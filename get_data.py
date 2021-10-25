@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 from typing import Iterable, Iterator, Union
 
+
 def main():
     # first read the filelist from disk
     filepaths = list(yield_filepaths('data/invoices.txt'))
