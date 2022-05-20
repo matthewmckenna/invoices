@@ -1,7 +1,24 @@
+# ignore folder attributes file
 .DS_Store
+
+# pyenv version file
 .python-version
+
+# python artefacts
 __pycache__/
 .ipynb_checkpoints/
+
+# editor settings
 .vscode/
+
+# ignore some or all files in these directories
 data/
 sandbox/
+legacy/*.ipynb
+legacy/notes.md
+
+# ignore all word documents
+*.docx
+
+# ignore any database files
+*.db
