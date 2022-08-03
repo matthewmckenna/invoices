@@ -32,11 +32,6 @@ The current plan is to create a number of command-line tools (or a single tool w
     - There are a number of files which are very similar, but may have some extra information at the end
   - Filter out temporary Word docs, and empty documents
 
-We've created a script (?) which calls:
-  - package: invoicedb
-  - module: cli.py
-  - function: main
-
 ```toml
 [tool.poetry.scripts]
 # package, module, function
@@ -51,6 +46,31 @@ We can use this tool on the command line as follows:
 poetry run invoicedb
 ```
 
+### Version
+
+To get the version:
+
+```zsh
+invoicedb --version
+invoicedb, version 0.1.0
+```
+
+
+### Dump Documents
+
+To dump all `.doc` and `.docx` files starting at `FILEPATH`, run:
+
+
+```zsh
+poetry run invoicedb dump FILEPATH
+```
+
+To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
+
+```zsh
+poetry run invoicedb dump FILEPATH --archive
+```
+
 ### Run Tests
 
 To run the test suite:
@@ -60,6 +80,11 @@ make test
 ```
 
 ## Development
+
+### Using the project during development
+
+- <https://stackoverflow.com/questions/55063392/poetry-manage-python-package-cli>
+- allows `click` & `poetry` to work together nicely
 
 ### Add a dependency
 
