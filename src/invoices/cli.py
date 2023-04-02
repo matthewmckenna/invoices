@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 """Find & extract all files of a given filetype from a directory"""
 import datetime
+import logging
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import Iterable, Iterator, Set
 
 import click
-import structlog
 
 from . import __version__
 
+# import structlog
 
-log = structlog.get_logger()
+
+log = logging.getLogger(__name__)
 
 
 @click.group()

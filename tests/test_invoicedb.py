@@ -1,9 +1,8 @@
-from pathlib import Path
 import tarfile
+from pathlib import Path
 
-from click.testing import CliRunner
 import pytest
-
+from click.testing import CliRunner
 from invoicedb import __version__
 from invoicedb.cli import cli
 

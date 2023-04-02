@@ -1,26 +1,44 @@
-.PHONY: black black-check clean install
+.PHONY: black black-check clean flake8 format install isort isort-check test
 
-POETRY := $(shell command -v poetry 2> /dev/null)
-VENV := .venv/
+SRC_PYTHON := /Users/matthew/.pyenv/versions/3.11.2/bin/python
+SRC_DIR := src/invoices
+TESTS_DIR := tests
+VENV_DIR := .venv
+ISORT := isort --profile black
+EGG_INFO_DIR := $(SRC_DIR)/invoices.egg-info
+
+VENV_PIP := $(VENV_DIR)/bin/pip
+VENV_PYTHON := $(VENV_DIR)/bin/python
 
 black:
-	black invoicedb tests --preview
+	black $(SRC_DIR) $(TESTS_DIR) --preview
 
 black-check:
-	black invoicedb tests --check --diff --color -v
+	black $(SRC_DIR) $(TESTS_DIR) --check --diff --color --preview -v
 
 check: black-check
 
 clean:
-	rm -rf invoicedb/__pycache__
-	rm -rf tests/__pycache__
+	rm -rf $(SRC_DIR)/__pycache__
+	rm -rf $(TESTS_DIR)/__pycache__
+	rm -rf $(EGG_INFO_DIR)
+
+flake8:
+	flake8 $(SRC_DIR) $(TESTS_DIR)
+
+format: isort black
 
 install:
-	rm -rf $(VENV)
-	$(POETRY) config virtualenvs.in-project true
-	$(POETRY) env use `pyenv which python`
-	$(POETRY) run python -m pip install --upgrade pip setuptools
-	$(POETRY) install
+	rm -rf $(VENV_DIR)
+	$(SRC_PYTHON) -m venv $(VENV_DIR)
+	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install --editable .
+
+isort:
+	$(ISORT) $(SRC_DIR) $(TESTS_DIR)
+
+isort-check:
+	$(ISORT) --check $(SRC_DIR) $(TESTS_DIR)
 
 test:
-	$(POETRY) run pytest tests
+	pytest $(TESTS_DIR)
