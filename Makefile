@@ -32,7 +32,7 @@ install:
 	rm -rf $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PIP) install --upgrade pip
-	$(VENV_PIP) install --editable .
+	$(VENV_PIP) install --editable .[dev]
 
 isort:
 	$(ISORT) $(SRC_DIR) $(TESTS_DIR)

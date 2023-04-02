@@ -17,3 +17,20 @@ dev = ["pytest"]
 
 [project.scripts]
 invoices = "invoices.cli:cli"
+
+[tool.black]
+line-length = 88
+# the minimum supported Python version for Black's output
+target-version = ['py311']
+# use preview style for formatting
+preview = true
+
+[tool.pytest.ini_options]
+minversion = "7.2.2"
+# -ra:
+  # -r: display a "short test summary info"
+  # -a: "all except passes"
+addopts = "-ra -v"
+testpaths = [
+    "tests",
+]
