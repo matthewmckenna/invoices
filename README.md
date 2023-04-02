@@ -5,6 +5,7 @@
 ## TODO
 
 - [x] upgrade project to 3.11.0b3
+- [ ] set up debugging in vscode
 
 
 ## Installation
@@ -35,7 +36,7 @@ The current plan is to create a number of command-line tools (or a single tool w
 ```toml
 [tool.poetry.scripts]
 # package, module, function
-invoicedb = "invoicedb.cli:main"
+invoicedb = "invoicedb.cli:cli"
 ```
 
 ## Usage
@@ -51,25 +52,39 @@ poetry run invoicedb
 To get the version:
 
 ```zsh
-invoicedb --version
+poetry run invoicedb --version
 invoicedb, version 0.1.0
 ```
 
 
 ### Dump Documents
 
-To dump all `.doc` and `.docx` files starting at `FILEPATH`, run:
+To dump all `.doc` and `.docx` files starting at `START_DIR`, run:
 
 
 ```zsh
-poetry run invoicedb dump FILEPATH
+poetry run invoicedb dump-documents START_DIR
 ```
 
 To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
 
 ```zsh
-poetry run invoicedb dump FILEPATH --archive
+poetry run invoicedb dump-documents START_DIR --archive
 ```
+
+The document dump location can be set in a number of ways:
+
+1. By setting the `INVOICE_DB_DIR` environment variable
+2. By supplying the `-d` or `--destination` argument
+
+If the location is not set using one of the two options above, the fallback location is set as `~/invoicedb/YYYY-MM-DD`
+
+#### Setting the document dump location
+
+```zsh
+poetry run invoicedb dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
+```
+
 
 ### Run Tests
 

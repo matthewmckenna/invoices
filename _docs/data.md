@@ -1,5 +1,12 @@
 # Data
 
+## TODO
+
+- [ ] Write Python code to generate the manifest
+- [ ] Add command line argument for manifest
+- [ ] Add command line argument for destination directory
+- [ ] Update `find` command to use `fd`
+
 ## Data Extraction
 
 This document will detail how the initial data was gathered, and how this can be reproduced.
@@ -15,12 +22,6 @@ $ head -n2 manifest_2022-05-20.txt
 ./Desktop/Echo Bank Lodgements/Echo Electrodynamics 2019 Payments.docx
 ```
 
-#### TODO
-
-- [ ] Update `find` command to use `fd`
-- [ ] Write Python code to generate the manifest
-
-
 ### Clean the Manifest
 
 The manifest will likely contain unwanted documents.
@@ -35,10 +36,5 @@ $ sed 's/^/~\//' data/invoices.txt >invoices_modified.txt
 
 ### Extract Data from Target
 
-Run `get_data.py` on the target machine.
-This script currently expects the filepaths (in the manifest) to be in `data/invoices.txt`.
-
-#### TODO
-
-- [ ] Add command line argument for manifest
-- [ ] Add command line argument for destination directory
+- Run `get_data.py` on the target machine.
+- This script currently expects the filepaths (in the manifest file) to be in `data/invoices.txt`.

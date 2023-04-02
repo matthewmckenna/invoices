@@ -4,7 +4,6 @@ import datetime
 import os
 from pathlib import Path
 import shutil
-import sys
 from typing import Iterable, Iterator, Set
 
 import click
@@ -23,7 +22,7 @@ log = structlog.get_logger()
 # @click.argument("--destination", "-d")
 # @click.option("--archive", "-a", default=False, is_flag=True)
 # def main(extensions: List[str], target: str, destination: str, archive: bool):
-def main():
+def cli():
     """Find and extract all files of a given filetype"""
     pass
 
@@ -112,9 +111,8 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         src = filepath
 
         # path to the new destination file
-        # we want to skip the first three elements of the source filepath:
-        # `('/', 'Users', 'username')`
-        dst = destination / Path(*filepath.parts[3:])
+        # dst = ORIGINAL_DESTINATION / START_DIR / RELATIVE_FILEPATH
+        dst = destination / get_relative_filepath(src, destination.stem)
         # log.debug("Mirroring...", src=src, dst=dst)
 
         # create the files parent directory if it doesn't exist
@@ -124,8 +122,13 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         shutil.copy2(src, dst)
 
 
+def get_relative_filepath(abs_filepath: Path, start_dir: Path) -> Path:
+    """Get the filepath relative to start_dir"""
+    return Path(str(abs_filepath).rsplit(start_dir, maxsplit=1)[-1].lstrip("/"))
+
+
 def make_archive(destination: Path, *, format: str = "bztar") -> Path:
-    """Create an archive named `destination`.`format``
+    """Create an archive named `destination`.`format`
 
     Defaults to creating a `.tar.bz2` archive.
 
@@ -139,47 +142,66 @@ def make_archive(destination: Path, *, format: str = "bztar") -> Path:
     archive_path = shutil.make_archive(
         base_name=destination,
         format=format,
-        root_dir=destination,
+        root_dir=destination.parent,
     )
     log.info("Created archive", archive_path=archive_path)
-    return archive_path
+    return Path(archive_path)
 
 
-@main.command()
-@click.argument("filepath", type=click.Path(resolve_path=True))
+@cli.command()
+@click.option(
+    "-d",
+    "--directory",
+    # default=lambda get_path():,
+    help="directory to remove",
+    type=click.Path(resolve_path=True, path_type=Path),
+)
+def delete_invoicedb(directory: Path):
+    """Delete all files in INVOICE_DB_DIR"""
+    directory = directory or get_path()
+    log.warn("Remove invoicedb directory", directory=directory)
+    # shutil.rmtree(directory)
+
+
+@cli.command()
+@click.argument("start_dir", type=click.Path(resolve_path=True, path_type=Path))
+@click.option("-d", "--destination", type=click.Path(resolve_path=True, path_type=Path))
 @click.option(
     "-a",
     "--archive",
     is_flag=True,
     default=False,
-    help="create a compressed archive"
+    help="create a compressed archive",
 )
-def dump_documents(filepath: Path, archive: bool = False):
-    """Create a dump of all documents starting at FILEPATH."""
+def dump_documents(start_dir: Path, destination: Path | None, archive: bool = False):
+    """Create a dump of all documents starting at START_DIR."""
     # TODO: add these to a config file
     extensions = {".doc", ".docx"}
 
     # get the date in the form YYYY-MM-DD
     today = datetime.date.today().isoformat()
 
-    # should this be configurable?
-    destination = get_path() / today
+    # TODO: allow setting destination in config file
+    destination = destination if destination else get_path() / today
+    # TODO: make this a bit cleaner
+    destination = destination / start_dir.stem
     destination.mkdir(exist_ok=True, parents=True)
 
     # list of absolute filepaths
-    document_filepaths = list(get_filepaths_of_interest(filepath, extensions))
+    document_filepaths = list(get_filepaths_of_interest(start_dir, extensions))
     num_documents = len(document_filepaths)
     log.info("Got document filepaths", num_documents=num_documents)
 
-    # TODO: write out the filepaths as a manifest creation / debug step
     copy_files(destination, document_filepaths)
     log.info("Copied documents", num_documents=num_documents, destination=destination)
 
-    # Find all files matching extensions
+    # find all files matching extensions
     if archive:
         # should we pass in a compression format here?
         # does it need to be configurable?
         make_archive(destination)
+
+    return destination
 
 
 def get_path():
@@ -193,7 +215,3 @@ def get_path():
         invoice_db_path = Path.home() / "invoicedb"
 
     return invoice_db_path
-
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover

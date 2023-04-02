@@ -4,7 +4,7 @@ POETRY := $(shell command -v poetry 2> /dev/null)
 VENV := .venv/
 
 black:
-	black invoicedb tests
+	black invoicedb tests --preview
 
 black-check:
 	black invoicedb tests --check --diff --color -v

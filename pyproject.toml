@@ -18,13 +18,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 # package, module, function
-# invoice-extract = "invoicedb.cli:main"
-invoicedb = "invoicedb.cli:main"
+invoicedb = "invoicedb.cli:cli"
 
 [tool.black]
 line-length = 88
 # the minimum supported Python version for Black's output
 target-version = ['py310']
+# use preview style for formatting
+preview = true
 
 [tool.pytest.ini_options]
 minversion = "7.1.2"
