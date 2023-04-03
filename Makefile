@@ -1,11 +1,14 @@
 .PHONY: black black-check clean flake8 format install isort isort-check test
 
 SRC_PYTHON := /Users/matthew/.pyenv/versions/3.11.2/bin/python
-SRC_DIR := src/invoices
+
+PROJECT_NAME := invoicetool
+SRC_DIR := src/$(PROJECT_NAME)
 TESTS_DIR := tests
 VENV_DIR := .venv
+EGG_INFO_DIR := $(SRC_DIR)/$(PROJECT_NAME).egg-info
+
 ISORT := isort --profile black
-EGG_INFO_DIR := $(SRC_DIR)/invoices.egg-info
 
 VENV_PIP := $(VENV_DIR)/bin/pip
 VENV_PYTHON := $(VENV_DIR)/bin/python

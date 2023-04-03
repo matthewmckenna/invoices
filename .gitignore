@@ -26,3 +26,5 @@ legacy/notes.md
 # virtual environment and build artefacts
 .venv
 *.egg-info/
+
+logs

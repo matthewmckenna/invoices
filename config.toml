@@ -1,0 +1,37 @@
+[invoicetool]
+extensions = [".doc", ".docx"]
+database_path = "~/.invoicetool"
+
+[log]
+version = 1
+
+[log.formatters.simple]
+format = "%(asctime)s %(levelname)-8s %(message)s"
+
+[log.handlers.console]
+class = "logging.StreamHandler"
+level = "INFO"
+formatter = "simple"
+stream = "ext://sys.stdout"
+
+[log.handlers.file_handler]
+class = "logging.FileHandler"
+# level = "DEBUG"
+formatter = "simple"
+filename = "output.log"
+mode = "w"
+encoding = "utf-8"
+
+[log.loggers.dev]
+level = "DEBUG"
+handlers = ["console", "file_handler"]
+propagate = false
+
+[log.loggers.test]
+level = "DEBUG"
+handlers = ["file_handler"]
+propagate = false
+
+[log.root]
+# level = "INFO"
+handlers = ["file_handler"]

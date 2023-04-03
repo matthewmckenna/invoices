@@ -3,20 +3,19 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "invoices"
+name = "invoicetool"
+version = "0.1.0"
 authors = [{name = "Matthew McKenna"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
-# dynamic = ["version"]
-version = "0.1.0"
 dependencies = ["click"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
 
 [project.scripts]
-invoices = "invoices.cli:cli"
+invoicetool = "invoicetool.cli:cli"
 
 [tool.black]
 line-length = 88

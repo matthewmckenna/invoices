@@ -1,20 +1,31 @@
 #!/usr/bin/env python
 """Find & extract all files of a given filetype from a directory"""
+from __future__ import annotations
+
 import datetime
-import logging
+
+# import logging
 import os
 import shutil
+import sys
 from pathlib import Path
-from typing import Iterable, Iterator, Set
+from typing import Iterable, Iterator
 
 import click
 
 from . import __version__
+from .config import load_config_dict
+from .log import setup_logging
 
 # import structlog
 
 
-log = logging.getLogger(__name__)
+# log = structlog.get_logger()
+# log.info("Hello, World!")
+# log = logging.getLogger(__name__)
+# log.info("Hello, World!")
+
+# log = logging.getLogger(__name__)
 
 
 @click.group()
@@ -25,8 +36,15 @@ log = logging.getLogger(__name__)
 # @click.option("--archive", "-a", default=False, is_flag=True)
 # def main(extensions: List[str], target: str, destination: str, archive: bool):
 def cli():
-    """Find and extract all files of a given filetype"""
+    """Utilities for creating and working with an invoices database"""
     pass
+
+
+@cli.command()
+def logr():
+    """Log a message"""
+    logger = setup_logging()
+    logger.info("Hello, World!")
 
 
 def yield_filepaths(filepath: str) -> Iterator[Path]:
@@ -77,7 +95,7 @@ def is_empty_file(path: Path) -> bool:
     return path.name.startswith("~$") and path.stat().st_size == 162
 
 
-def get_filepaths_of_interest(target: Path, extensions: Set[str]) -> Iterator[Path]:
+def get_filepaths_of_interest(target: Path, extensions: set[str]) -> Iterator[Path]:
     """Yield a sequence of absolute filepaths starting from the
     `target` directory which match `extensions`.
 
@@ -166,8 +184,17 @@ def delete_invoicedb(directory: Path):
 
 
 @cli.command()
-@click.argument("start_dir", type=click.Path(resolve_path=True, path_type=Path))
+@click.argument(
+    "start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
+)
 @click.option("-d", "--destination", type=click.Path(resolve_path=True, path_type=Path))
+@click.option(
+    "-c",
+    "--config",
+    type=click.Path(resolve_path=True, path_type=Path, dir_okay=False),
+    help="path to config file",
+    default="./config.toml",
+)
 @click.option(
     "-a",
     "--archive",
@@ -177,8 +204,12 @@ def delete_invoicedb(directory: Path):
 )
 def dump_documents(start_dir: Path, destination: Path | None, archive: bool = False):
     """Create a dump of all documents starting at START_DIR."""
+
     # TODO: add these to a config file
     extensions = {".doc", ".docx"}
+    config = load_config(config)
+    logger.info(config)
+    sys.exit(4)
 
     # get the date in the form YYYY-MM-DD
     today = datetime.date.today().isoformat()

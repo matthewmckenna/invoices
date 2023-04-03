@@ -1,4 +1,4 @@
-# Invoices
+# Invoice Tool
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -21,7 +21,7 @@ This will do the following:
 - Remove any existing virtual environment (in `.venv`) if it exists
 - Create a new virtual environment using Python 3.11.2
 - Updates `pip`
-- Installs the `invoices` project in editable mode
+- Installs the `invoicetool` project in editable mode
 
 ### Activate the Environment
 
@@ -62,7 +62,7 @@ The current plan is to create a number of command-line tools (or a single tool w
 
 ```toml
 [project.scripts]
-invoices = "invoices.cli:cli"
+invoicetool = "invoicetool.cli:cli"
 ```
 
 ## Usage
@@ -70,7 +70,7 @@ invoices = "invoices.cli:cli"
 We can use this tool on the command line as follows:
 
 ```zsh
-invoices
+invoicetool
 ```
 
 ### Version
@@ -78,8 +78,8 @@ invoices
 To get the version:
 
 ```zsh
-invoices --version
-invoices, version 0.1.0
+invoicetool --version
+invoicetool, version 0.1.0
 ```
 
 
@@ -89,13 +89,13 @@ To dump all `.doc` and `.docx` files starting at `START_DIR`, run:
 
 
 ```zsh
-invoices dump-documents START_DIR
+invoicetool dump-documents START_DIR
 ```
 
 To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
 
 ```zsh
-invoices dump-documents START_DIR --archive
+invoicetool dump-documents START_DIR --archive
 ```
 
 The document dump location can be set in a number of ways:
@@ -108,5 +108,5 @@ If the location is not set using one of the two options above, the fallback loca
 #### Setting the document dump location
 
 ```zsh
-invoices dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
+invoicetool dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
 ```
