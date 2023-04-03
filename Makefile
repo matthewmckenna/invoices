@@ -6,7 +6,7 @@ PROJECT_NAME := invoicetool
 SRC_DIR := src/$(PROJECT_NAME)
 TESTS_DIR := tests
 VENV_DIR := .venv
-EGG_INFO_DIR := $(SRC_DIR)/$(PROJECT_NAME).egg-info
+EGG_INFO_DIR := src/$(PROJECT_NAME).egg-info
 
 ISORT := isort --profile black
 

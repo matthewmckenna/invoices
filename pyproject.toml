@@ -18,7 +18,7 @@ dev = ["pytest"]
 invoicetool = "invoicetool.cli:cli"
 
 [tool.black]
-line-length = 88
+line-length = 100
 # the minimum supported Python version for Black's output
 target-version = ['py311']
 # use preview style for formatting
