@@ -184,9 +184,7 @@ def delete_invoicedb(directory: Path):
 
 
 @cli.command()
-@click.argument(
-    "start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
-)
+@click.argument("start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False))
 @click.option("-d", "--destination", type=click.Path(resolve_path=True, path_type=Path))
 @click.option(
     "-c",
