@@ -26,16 +26,14 @@ def get_project_directory() -> Path:
     The directory tree for this file is as follows:
 
     invoicetool_project  # project directory / repository
-    └── src
-        └── invoicetool
-            └──  config.py
+    └── invoicetool
+        └── config.py
 
     Path(__file__) == Path("config.py")
     Path(__file__).parent == Path("invoicetool")
-    Path(__file__).parent.parent == Path("src")
-    Path(__file__).parent.parent.parent == Path("invoicetool_project")
+    Path(__file__).parent.parent == Path("invoicetool_project")
     """
-    return Path(__file__).parent.parent.parent
+    return Path(__file__).parent.parent
 
 
 def get_default_config_filepath() -> Path:
