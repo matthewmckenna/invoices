@@ -25,13 +25,6 @@ def cli():
     pass
 
 
-@cli.command()
-def logr():
-    """Log a message"""
-    logger = setup_logging()
-    logger.info("Hello, World!")
-
-
 # @cli.command()
 # @click.option(
 #     "-d",
@@ -87,13 +80,13 @@ def dump_documents(
     # destination = working_directory / YYYY-MM-DD / START_DIR
     destination = ensure_path(working_directory / today2ymd() / start_dir.stem)
 
+    copy_files(destination, document_filepaths)
+    logger.info(f"Copied {num_documents} documents to {destination}")
+
     if archive:
         # TODO: allow configuration of compression format via
         # config file and command line option
         archive_path = make_archive(destination)
         logger.info(f"Created compressed archive {archive_path}")
-    else:
-        copy_files(destination, document_filepaths)
-        logger.info(f"Copied {num_documents} documents to {destination}")
 
     return destination

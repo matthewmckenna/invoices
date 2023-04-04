@@ -25,13 +25,6 @@ def scantree(path: Path) -> Iterator[os.DirEntry[str]]:
             yield entry
 
 
-def yield_filepaths(filepath: str) -> Iterator[Path]:
-    """yield Path objects from a manifest file `filepath`"""
-    with open(filepath, "rt") as f:
-        for line in f:
-            yield Path(line.strip()).expanduser()
-
-
 def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
     """Yield a sequence of absolute filepaths starting from the
     `target` directory which match `extensions`.
