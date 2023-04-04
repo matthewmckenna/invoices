@@ -98,7 +98,7 @@ To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz
 invoicetool dump-documents START_DIR --archive
 ```
 
-### Setting the document dump location
+#### Setting the document dump location
 
 The document dump location can be set in a number of ways.
 In order of precedence, the location can be set by:
@@ -141,7 +141,7 @@ working_directory = "DOCUMENT_DUMP_LOCATION"
 ```
 
 
-### E2E Example: `dump-documents`
+#### E2E Example: `dump-documents`
 
 Here's an end-to-end example using the `dump-documents` command of `invoicetool`.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Find & extract all files of a given filetype from a directory"""
+"""CLI tools for creating and working with an invoices database"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,14 +14,9 @@ from .log import setup_logging
 
 
 @click.group()
-# @click.argument("--extensions", "-e", required=True)
 @click.version_option(version=__version__)
-# @click.argument("--target", "-t", required=True)
-# @click.argument("--destination", "-d")
-# @click.option("--archive", "-a", default=False, is_flag=True)
-# def main(extensions: List[str], target: str, destination: str, archive: bool):
 def cli():
-    """Utilities for creating and working with an invoices database"""
+    """CLI tools for creating and working with an invoices database"""
     pass
 
 
@@ -63,7 +58,7 @@ def cli():
 def dump_documents(
     start_dir: Path, output_directory: Path | None, config_filepath: Path, archive: bool
 ) -> Path:
-    """Dump all documents starting at START_DIR"""
+    """Search for & copy Word documents starting at `START_DIR`"""
     logger = setup_logging()
     config = load_config(config_filepath)
     logger.info(config)
