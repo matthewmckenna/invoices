@@ -1,11 +1,8 @@
 # Invoice Tool
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/matthewmckenna/invoices/mmk/2023-04-refactor)
-
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/matthewmckenna/invoices)
-
 ![GitHub issues](https://img.shields.io/github/issues/matthewmckenna/invoices)
 
 This project contains a number of utilities for creating an invoices database.
