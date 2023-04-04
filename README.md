@@ -106,6 +106,7 @@ document_dump_location = working_directory / "YYYY-MM-DD"
 #### Examples
 
 This section demonstrates a number of ways to set the document dump location.
+To see a full end-to-end example of the `dump-documents` command see [this section](docs/examples.md#e2e-example-dump-documents).
 
 To set the document dump location using the `-d` or `--destination` option:
 
