@@ -46,7 +46,7 @@ flake8:
 format: isort black
 
 install:
-	rm -r $(VENV_DIR)
+	rm -rf $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install --editable .[dev]
