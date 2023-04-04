@@ -4,4 +4,6 @@ extend-ignore =
     # E126: continuation line over-indented for hanging indent
     E126,
     # E203: whitespace before `,`, `;`, or `:`
-    E203
+    E203,
+    # F541: f-string is missing placeholders
+    F541,

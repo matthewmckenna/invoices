@@ -22,9 +22,12 @@ black-check:
 check: black-check
 
 clean:
-	rm -rf $(SRC_DIR)/__pycache__
-	rm -rf $(TESTS_DIR)/__pycache__
-	rm -rf $(EGG_INFO_DIR)
+	rm -r $(SRC_DIR)/__pycache__
+	rm -r $(TESTS_DIR)/__pycache__
+	rm -r $(EGG_INFO_DIR)
+
+clean-logs:
+	rm -r logs/*.log
 
 flake8:
 	flake8 $(SRC_DIR) $(TESTS_DIR)

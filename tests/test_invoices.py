@@ -47,7 +47,7 @@ def test_document_dump(invoices_dir, tmp_path):
     # in the main application code we strip off the first three elements
     # of the filepath ("/", "Users", "USERNAME")
     # docs_dir = destination / Path(*invoices_dir.parts[3:])
-    # docs_dir = destination / str(invoices_dir).rsplit(destination.stem, maxsplit=1)[-1].lstrip("/")
+    # docs_dir = destination/str(invoices_dir).rsplit(destination.stem, maxsplit=1)[-1].lstrip("/")
     result = runner.invoke(
         cli,
         [
