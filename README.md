@@ -2,6 +2,12 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/matthewmckenna/invoices/mmk/2023-04-refactor)
+
+![GitHub pull requests](https://img.shields.io/github/issues-pr/matthewmckenna/invoices)
+
+![GitHub issues](https://img.shields.io/github/issues/matthewmckenna/invoices)
+
 This project contains a number of utilities for creating an invoices database.
 
 ## Installation
@@ -11,9 +17,9 @@ This project is being built with **Python 3.11.2**.
 To install the project, clone the repository, navigate to the repo, and run:
 
 ```zsh
-git clone git@github.com:matthewmckenna/invoices.git
-cd invoices
-make install
+❯ git clone git@github.com:matthewmckenna/invoices.git
+❯ cd invoices
+❯ make install
 ```
 
 This will do the following:
@@ -28,7 +34,7 @@ This will do the following:
 To activate the environent:
 
 ```zsh
-source .venv/bin/activate
+❯ source .venv/bin/activate
 ```
 
 ### Format the Project
@@ -36,7 +42,7 @@ source .venv/bin/activate
 To format the project, run:
 
 ```zsh
-make format
+❯ make format
 ```
 
 This runs:
@@ -46,7 +52,7 @@ This runs:
 ### Run Tests
 
 ```zsh
-make test
+❯ make test
 ```
 
 ## Plan
@@ -70,7 +76,17 @@ invoicetool = "invoicetool.cli:cli"
 We can use this tool on the command line as follows:
 
 ```zsh
-invoicetool
+❯ invoicetool
+Usage: invoicetool [OPTIONS] COMMAND [ARGS]...
+
+  CLI tools for creating and working with an invoices database
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  dump-documents  Search for & copy Word documents starting at `START_DIR`
 ```
 
 ### Version
@@ -78,10 +94,9 @@ invoicetool
 To get the version:
 
 ```zsh
-invoicetool --version
+❯ invoicetool --version
 invoicetool, version 0.1.0
 ```
-
 
 ### Dump Documents
 
@@ -89,13 +104,13 @@ To dump all `.doc` and `.docx` files starting at `START_DIR`, run:
 
 
 ```zsh
-invoicetool dump-documents START_DIR
+❯ invoicetool dump-documents START_DIR
 ```
 
 To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
 
 ```zsh
-invoicetool dump-documents START_DIR --archive
+❯ invoicetool dump-documents START_DIR --archive
 ```
 
 #### Setting the document dump location
@@ -114,7 +129,7 @@ If none of the above options are set, the fallback location is set as `~/.invoic
 To set the document dump location using the `-d` or `--destination` option:
 
 ```zsh
-invoicetool dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
+❯ invoicetool dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
 ```
 
 ----
@@ -122,14 +137,14 @@ invoicetool dump-documents START_DIR --destination DOCUMENT_DUMP_LOCATION
 To set the document dump location using the `INVOICETOOL_WORKING_DIR` environment variable:
 
 ```zsh
-export INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION
+❯ export INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION
 invoicetool dump-documents START_DIR
 ```
 
 or to set the environment variable for the current session only:
 
 ```zsh
-INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION invoicetool dump-documents START_DIR
+❯ INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION invoicetool dump-documents START_DIR
 ```
 
 ----
@@ -139,7 +154,6 @@ To set the document dump location using the `working_directory` option in the `c
 ```toml
 working_directory = "DOCUMENT_DUMP_LOCATION"
 ```
-
 
 #### E2E Example: `dump-documents`
 
