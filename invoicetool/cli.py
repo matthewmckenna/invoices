@@ -90,3 +90,7 @@ def dump_documents(
         logger.info(f"Created compressed archive {archive_path}")
 
     return destination
+
+
+if __name__ == "__main__":
+    cli()

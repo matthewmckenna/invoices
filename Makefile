@@ -1,4 +1,4 @@
-.PHONY: black black-check clean flake8 format install isort isort-check test
+.PHONY: black black-check clean clean-logs coverage flake8 format install isort isort-check test
 
 SHELL := bash
 .ONESHELL:
@@ -10,10 +10,10 @@ MAKEFLAGS += --no-builtin-rules
 SRC_PYTHON := /Users/matthew/.pyenv/versions/3.11.2/bin/python
 
 PROJECT_NAME := invoicetool
-SRC_DIR := src/$(PROJECT_NAME)
+SRC_DIR := $(PROJECT_NAME)
 TESTS_DIR := tests
 VENV_DIR := .venv
-EGG_INFO_DIR := src/$(PROJECT_NAME).egg-info
+EGG_INFO_DIR := $(PROJECT_NAME).egg-info
 
 ISORT := isort --profile black
 
@@ -29,9 +29,11 @@ black-check:
 check: black-check
 
 clean:
-	rm -r $(SRC_DIR)/__pycache__
-	rm -r $(TESTS_DIR)/__pycache__
-	rm -r $(EGG_INFO_DIR)
+	rm -rf $(SRC_DIR)/__pycache__
+	rm -rf $(TESTS_DIR)/__pycache__
+	rm -rf $(EGG_INFO_DIR)
+	rm -rf .out/
+	rm -rf .pytest_cache/
 
 clean-logs:
 	rm -r logs/*.log
@@ -46,7 +48,7 @@ flake8:
 format: isort black
 
 install:
-	rm -r $(VENV_DIR)
+	rm -rf $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install --editable .[dev]

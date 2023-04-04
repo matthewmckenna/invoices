@@ -11,6 +11,9 @@ license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = ["click"]
 
+[tool.setuptools]
+packages = ["invoicetool"]
+
 [project.optional-dependencies]
 dev = ["coverage", "pytest", "pytest-cov"]
 
@@ -28,7 +31,7 @@ preview = true
 directory = ".out/htmlcov"
 
 [tool.coverage.run]
-source = ["src/invoicetool", "tests"]
+source = ["invoicetool", "tests"]
 omit = ["books", "docs", "legacy/*", "logs"]
 
 [tool.coverage.report]
