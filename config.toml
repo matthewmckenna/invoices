@@ -1,8 +1,8 @@
 [invoicetool]
 # a list of extensions that we're interested in searching for
 extensions = [".doc", ".docx"]
-# the working path where the invoice database, and document dumps will be located
-working_path = "~/.invoicetool"
+# the working directory where the invoice database, and document dumps will be located
+working_directory = "~/.invoicetool"
 
 [log]
 version = 1

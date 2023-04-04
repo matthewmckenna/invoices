@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,10 +11,10 @@ from typing import Any
 @dataclass
 class Config:
     extensions: list[int]
-    working_path: Path
+    working_directory: Path
 
     def __post_init__(self):
-        self.working_path = Path(self.working_path).expanduser()
+        self.working_directory = Path(self.working_directory).expanduser()
 
 
 def get_project_directory() -> Path:
@@ -67,3 +68,22 @@ def load_logging_config_dict(filepath: Path | str) -> dict[str, Any]:
     """Load a logging config file and return as a dict"""
     config_dict = load_config_dict(filepath)
     return config_dict["log"]
+
+
+def get_working_directory(config: Config | None = None) -> Path:
+    """Get the working directory for `invoicetool`.
+
+    In order of precedence:
+      - `INVOICETOOL_WORKING_DIR` environment variable
+      - `working_directory` in `config.toml
+      - `~/.invoicetool`
+    """
+    env_working_dir = os.getenv("INVOICETOOL_WORKING_DIR")
+    if env_working_dir:
+        working_directory = Path(env_working_dir)
+    elif config and config.working_directory:
+        working_directory = Path(config.working_directory)
+    else:
+        working_directory = Path.home() / ".invoicetool"
+
+    return working_directory.expanduser().resolve()

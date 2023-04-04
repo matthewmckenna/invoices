@@ -11,8 +11,9 @@ from typing import Iterable, Iterator
 import click
 
 from . import __version__
-from .config import load_config
+from .config import get_working_directory, load_config
 from .dates_times import today2ymd
+from .iotools import ensure_path
 from .log import setup_logging
 
 
@@ -173,7 +174,9 @@ def delete_invoicedb(directory: Path):
 
 @cli.command()
 @click.argument("start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False))
-@click.option("-d", "--destination", type=click.Path(resolve_path=True, path_type=Path))
+@click.option(
+    "-o", "--output-directory", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
+)
 @click.option(
     "-c",
     "--config",
@@ -189,29 +192,30 @@ def delete_invoicedb(directory: Path):
     default=False,
     help="create a compressed archive",
 )
-def dump_documents(start_dir: Path, destination: Path | None, config_filepath: Path, archive: bool):
+def dump_documents(
+    start_dir: Path, output_directory: Path | None, config_filepath: Path, archive: bool
+):
     """Create a dump of all documents starting at START_DIR."""
     logger = setup_logging()
     config = load_config(config_filepath)
     logger.info(config)
 
     # get the date in the form YYYY-MM-DD
-    today = today2ymd()
+    # today = today2ymd()
 
-    # TODO: allow setting destination in config file
-    destination = destination if destination else get_path() / today
-    # TODO: make this a bit cleaner
-    destination = destination / start_dir.stem
-    destination.mkdir(exist_ok=True, parents=True)
-    sys.exit(4)
+    working_directory = output_directory if output_directory else get_working_directory()
+    logger.info(f"Using working directory: {working_directory}")
+
+    # ensure_path(destination / start_dir.stem)
 
     # list of absolute filepaths
-    document_filepaths = list(get_filepaths_of_interest(start_dir, extensions))
+    document_filepaths = list(get_filepaths_of_interest(start_dir, config.extensions))
     num_documents = len(document_filepaths)
-    log.info("Got document filepaths", num_documents=num_documents)
+    logger.info(f"Found {num_documents} documents")
 
+    sys.exit(4)
     copy_files(destination, document_filepaths)
-    log.info("Copied documents", num_documents=num_documents, destination=destination)
+    logger.info(f"Copied {num_documents} documents to {destination}")
 
     # find all files matching extensions
     if archive:
@@ -220,16 +224,3 @@ def dump_documents(start_dir: Path, destination: Path | None, config_filepath: P
         make_archive(destination)
 
     return destination
-
-
-def get_path():
-    """Get the path of the `invoicedb` data directory"""
-    # TODO: document the use of environment variables here
-    invoice_db_path_env = os.getenv("INVOICE_DB_DIR", "")
-
-    if invoice_db_path_env:
-        invoice_db_path = Path(invoice_db_path_env)
-    else:
-        invoice_db_path = Path.home() / "invoicedb"
-
-    return invoice_db_path
