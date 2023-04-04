@@ -23,7 +23,7 @@ books
 We run the `dump-documents` command:
 
 ```zsh
-❯ invoicetool dump-documents books --output-directory ~/document-dumps
+❯ invoicetool dump-documents --output-directory ~/document-dumps books
 ```
 
 We can go to the `--output-directory` specified above (`~/document-dumps`) and see that the directory structure has been mirrored:
