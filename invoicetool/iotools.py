@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -25,43 +28,39 @@ def scantree(path: Path) -> Iterator[os.DirEntry[str]]:
             yield entry
 
 
-def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
+def filepaths_with_extensions(directory: Path, extensions: Iterable[str]):
     """Yield a sequence of absolute filepaths starting from the
-    `target` directory which match `extensions`.
+    `directory` which match `extensions`.
     """
-    for entry in scantree(target):
+    for entry in scantree(directory):
         p = Path(entry.path)
 
-        # Skip files with extensions not in `extensions`
+        # skip files with extensions not in `extensions`
         if p.suffix not in extensions:
-            continue
-
-        # Skip empty files
-        # TODO: refactor this. maybe more checks to test if a file is empty
-        if is_empty_file(p):
             continue
 
         yield p.expanduser().resolve()
 
 
-def remove_temporary_word_files(directory: Path, *, dry_run: bool = False):
+def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
+    """Yield a sequence of absolute filepaths starting from the
+    `target` directory which match `extensions`.
+    """
+    for filepath in filepaths_with_extensions(target, extensions):
+        if is_empty_file(filepath):
+            continue
+        yield filepath
+
+
+def remove_temporary_word_files(directory: Path, *, dry_run: bool = False, logger: logging.Logger):
     """recursively scan for and remove any temporary ms word files"""
     # Hard-code the extensions as we're removing specific file types
     extensions = {".doc", ".docx"}
-    dry_run_message = "" if not dry_run else "DRY RUN: "
 
-    for entry in scantree(directory):
-        p = Path(entry.path)
-
-        # skip files with extensions we're not interested in
-        if p.suffix not in extensions:
-            continue
-
-        # remove any temporary files
-        if is_empty_file(p):
-            print(f"{dry_run_message}Removing temp file {p}")
-            if not dry_run:
-                p.unlink()
+    for filepath in filepaths_with_extensions(directory, extensions):
+        if is_empty_file(filepath):
+            logger.info(f"Remove temporary Word document: {filepath.name}")
+            filepath.unlink()
 
 
 def is_empty_file(path: Path) -> bool:
