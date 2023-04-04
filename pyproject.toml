@@ -12,7 +12,7 @@ classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = ["click"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["coverage", "pytest", "pytest-cov"]
 
 [project.scripts]
 invoicetool = "invoicetool.cli:cli"
@@ -24,12 +24,23 @@ target-version = ['py311']
 # use preview style for formatting
 preview = true
 
+[tool.coverage.html]
+directory = ".out/htmlcov"
+
+[tool.coverage.run]
+source = ["src/invoicetool", "tests"]
+omit = ["books", "docs", "legacy/*", "logs"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+
 [tool.pytest.ini_options]
 minversion = "7.2.2"
 # -ra:
   # -r: display a "short test summary info"
   # -a: "all except passes"
-addopts = "-ra -v"
+addopts = "-ra -v --cov-report=html --cov-report=term --cov-report=xml:.out/coverage.xml"
 testpaths = [
     "tests",
 ]

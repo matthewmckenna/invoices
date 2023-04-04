@@ -1,5 +1,12 @@
 .PHONY: black black-check clean flake8 format install isort isort-check test
 
+SHELL := bash
+.ONESHELL:
+.DELETE_ON_ERROR:
+.SHELLFLAGS := -eu -o pipefail -c
+MAKEFLAGS += --warn-undefined-variables
+MAKEFLAGS += --no-builtin-rules
+
 SRC_PYTHON := /Users/matthew/.pyenv/versions/3.11.2/bin/python
 
 PROJECT_NAME := invoicetool
@@ -29,13 +36,17 @@ clean:
 clean-logs:
 	rm -r logs/*.log
 
+coverage:
+	pytest $(TESTS_DIR) --cov
+	open .out/htmlcov/index.html
+
 flake8:
 	flake8 $(SRC_DIR) $(TESTS_DIR)
 
 format: isort black
 
 install:
-	rm -rf $(VENV_DIR)
+	rm -r $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install --editable .[dev]

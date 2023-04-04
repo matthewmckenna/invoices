@@ -28,3 +28,6 @@ legacy/notes.md
 *.egg-info/
 
 logs
+.coverage
+.out
+
