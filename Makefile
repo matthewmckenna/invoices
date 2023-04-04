@@ -8,12 +8,15 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 SRC_PYTHON := /Users/matthew/.pyenv/versions/3.11.2/bin/python
+PIP_COMPILE := /Users/matthew/.local/bin/pip-compile --resolver backtracking --generate-hashes
 
 PROJECT_NAME := invoicetool
 SRC_DIR := $(PROJECT_NAME)
 TESTS_DIR := tests
 VENV_DIR := .venv
 EGG_INFO_DIR := $(PROJECT_NAME).egg-info
+
+PYPROJECT_TOML := pyproject.toml
 
 ISORT := isort --profile black
 
@@ -50,8 +53,11 @@ format: isort black
 install:
 	rm -rf $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
-	$(VENV_PIP) install --upgrade pip
-	$(VENV_PIP) install --editable .[dev]
+	$(PIP_COMPILE) --output-file requirements.txt $(PYPROJECT_TOML)
+	$(PIP_COMPILE) --output-file requirements-dev.txt --extra dev $(PYPROJECT_TOML)
+	$(VENV_PIP) install --upgrade pip setuptools
+	$(VENV_PIP) install -r requirements.txt -r requirements-dev.txt
+	$(VENV_PIP) install --editable .
 
 isort:
 	$(ISORT) $(SRC_DIR) $(TESTS_DIR)
