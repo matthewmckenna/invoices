@@ -49,7 +49,12 @@ def load_config(filepath: Path | str) -> Config:
 
 
 def load_config_dict(filepath: Path | str) -> dict[str, Any]:
-    """Load a config file and return as a dict"""
+    """Load a config file and return as a dict.
+
+    Supported file formats:
+      - TOML
+      - JSON
+    """
     if isinstance(filepath, str):
         filepath = Path(filepath)
     with open(filepath, "rb") as f:
@@ -73,7 +78,7 @@ def get_working_directory(config: Config | None = None) -> Path:
 
     In order of precedence:
       - `INVOICETOOL_WORKING_DIR` environment variable
-      - `working_directory` in `config.toml
+      - `working_directory` in `config.toml`
       - `~/.invoicetool`
     """
     env_working_dir = os.getenv("INVOICETOOL_WORKING_DIR")
