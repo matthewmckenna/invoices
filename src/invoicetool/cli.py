@@ -2,9 +2,6 @@
 """Find & extract all files of a given filetype from a directory"""
 from __future__ import annotations
 
-import datetime
-
-# import logging
 import os
 import shutil
 import sys
@@ -14,18 +11,9 @@ from typing import Iterable, Iterator
 import click
 
 from . import __version__
-from .config import load_config_dict
+from .config import load_config
+from .dates_times import today2ymd
 from .log import setup_logging
-
-# import structlog
-
-
-# log = structlog.get_logger()
-# log.info("Hello, World!")
-# log = logging.getLogger(__name__)
-# log.info("Hello, World!")
-
-# log = logging.getLogger(__name__)
 
 
 @click.group()
@@ -189,6 +177,7 @@ def delete_invoicedb(directory: Path):
 @click.option(
     "-c",
     "--config",
+    "config_filepath",
     type=click.Path(resolve_path=True, path_type=Path, dir_okay=False),
     help="path to config file",
     default="./config.toml",
@@ -200,23 +189,21 @@ def delete_invoicedb(directory: Path):
     default=False,
     help="create a compressed archive",
 )
-def dump_documents(start_dir: Path, destination: Path | None, archive: bool = False):
+def dump_documents(start_dir: Path, destination: Path | None, config_filepath: Path, archive: bool):
     """Create a dump of all documents starting at START_DIR."""
-
-    # TODO: add these to a config file
-    extensions = {".doc", ".docx"}
-    config = load_config(config)
+    logger = setup_logging()
+    config = load_config(config_filepath)
     logger.info(config)
-    sys.exit(4)
 
     # get the date in the form YYYY-MM-DD
-    today = datetime.date.today().isoformat()
+    today = today2ymd()
 
     # TODO: allow setting destination in config file
     destination = destination if destination else get_path() / today
     # TODO: make this a bit cleaner
     destination = destination / start_dir.stem
     destination.mkdir(exist_ok=True, parents=True)
+    sys.exit(4)
 
     # list of absolute filepaths
     document_filepaths = list(get_filepaths_of_interest(start_dir, extensions))
