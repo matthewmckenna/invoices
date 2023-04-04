@@ -3,6 +3,7 @@
 extensions = [".doc", ".docx"]
 # the working directory where the invoice database, and document dumps will be located
 working_directory = "~/.invoicetool"
+hash_function_algorithm = "sha1"
 
 [log]
 version = 1

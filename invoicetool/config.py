@@ -7,14 +7,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .iotools import pathify
+
 
 @dataclass
 class Config:
     extensions: list[int]
     working_directory: Path
+    hash_function_algorithm: str
 
     def __post_init__(self):
-        self.working_directory = Path(self.working_directory).expanduser()
+        self.working_directory = pathify(self.working_directory)
 
 
 def get_project_directory() -> Path:

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Any, Iterable, Iterator
 
 
 def ensure_path(path: Path | str):
@@ -15,7 +16,7 @@ def ensure_path(path: Path | str):
     if "." in path.name:
         path = path.parent
 
-    path.expanduser().mkdir(exist_ok=True, parents=True)
+    pathify(path).mkdir(exist_ok=True, parents=True)
     return path
 
 
@@ -39,7 +40,7 @@ def filepaths_with_extensions(directory: Path, extensions: Iterable[str]):
         if p.suffix not in extensions:
             continue
 
-        yield p.expanduser().resolve()
+        yield pathify(p)
 
 
 def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
@@ -119,3 +120,24 @@ def make_archive(destination: Path, *, format: str = "bztar") -> Path:
         root_dir=destination.parent,
     )
     return Path(archive_path)
+
+
+def write_json(obj: Any, filepath: Path) -> None:
+    """Write an object to a JSON file."""
+    if isinstance(filepath, str):
+        filepath = pathify(filepath)
+    filepath.write_text(json.dumps(obj, indent=2))
+
+
+def load_json(obj: Any, filepath: Path) -> dict[str, Any]:
+    """Load a JSON file into a dictionary."""
+    if isinstance(filepath, str):
+        filepath = pathify(filepath)
+    return json.loads(filepath.read_text())
+
+
+def pathify(path: Path | str) -> Path:
+    """Return an absolute Path object with the home directory expanded"""
+    if isinstance(path, str):
+        path = Path(path)
+    return path.expanduser().resolve()

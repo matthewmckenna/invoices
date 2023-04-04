@@ -11,7 +11,7 @@
 
 ## README
 
-- [ ] add badges
+- [x] add badges
 - [ ] update e2e example for `dump-documents` to reflect date (YYYY-MM-DD) in the output directory
 
 ## `dump-documents`

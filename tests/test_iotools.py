@@ -1,5 +1,8 @@
-# import pytest
-from invoicetool.iotools import ensure_path
+from pathlib import Path
+
+import pytest
+
+from invoicetool.iotools import ensure_path, pathify
 
 
 def test_ensure_path_new_directory(tmp_path):
@@ -12,6 +15,23 @@ def test_ensure_path_existing_directory(tmp_path):
     path = ensure_path(tmp_path)
     assert path.exists()
     assert path.is_dir()
+
+
+@pytest.mark.parametrize(
+    "path, expected",
+    [
+        ("~/test", Path.home() / "test"),
+        ("~/test/../test/./", Path.home() / "test"),
+        ("~/non_existent", Path.home() / "non_existent"),
+        ("/non/existent/path", Path("/non/existent/path")),
+    ],
+)
+def test_pathify(path, expected):
+    assert pathify(path) == expected
+
+
+def test_pathify_type():
+    assert isinstance(pathify("~/test"), Path)
 
 
 # def test_scantree(invoices_dir):
