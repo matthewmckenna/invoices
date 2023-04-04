@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import Iterator
 
 import click
 
 from .config import Config
 from .dates_times import today2ymd
-from .iotools import filepaths_with_extensions
+from .iotools import filepaths_with_extensions, write_json
 
 
 @click.command()
@@ -100,7 +98,3 @@ def write_duplicates_to_file(duplicates: dict[str, list[str]], config: Config) -
     """Write the duplicates to a JSON file."""
     duplicates_filepath = config.working_directory / today2ymd() / "duplicates.json"
     write_json(duplicates, duplicates_filepath)
-    with open(duplicates_filepath, "wt") as f:
-        json.dump(sorted_duplicates, f, indent=2)
-
-    print(f"wrote duplicates list to {output_filepath}")

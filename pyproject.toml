@@ -32,7 +32,7 @@ directory = ".out/htmlcov"
 
 [tool.coverage.run]
 source = ["invoicetool", "tests"]
-omit = ["books", "docs", "legacy/*", "logs"]
+omit = ["data", "docs", "legacy", "logs"]
 
 [tool.coverage.report]
 show_missing = true

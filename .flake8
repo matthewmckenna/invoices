@@ -7,7 +7,8 @@ exclude =
     .venv,
     .vscode,
     **/__pycache__,
-    books,
+    data,
+    docs,
     legacy,
     logs,
 extend-ignore =
