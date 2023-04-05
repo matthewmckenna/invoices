@@ -9,7 +9,15 @@ import click
 from . import __version__
 from .config import get_working_directory, load_config
 from .dates_times import today2ymd
-from .iotools import copy_files, ensure_path, get_filepaths_of_interest, make_archive
+from .hashes import calculate_hashes, get_duplicate_files, get_hash_function
+from .iotools import (
+    copy_files,
+    ensure_path,
+    get_filepaths_of_interest,
+    make_archive,
+    write_duplicates,
+    write_hashes,
+)
 from .log import setup_logging
 
 
@@ -34,19 +42,23 @@ def cli():
 #     log.warn("Remove invoicedb directory", directory=directory)
 #     # shutil.rmtree(directory)
 
-
-@cli.command()
-@click.argument("start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False))
-@click.option(
-    "-o", "--output-directory", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
+start_dir_argument = click.argument(
+    "start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
 )
-@click.option(
+config_option = click.option(
     "-c",
     "--config",
     "config_filepath",
     type=click.Path(resolve_path=True, path_type=Path, dir_okay=False),
     help="path to config file",
     default="./config.toml",
+    show_default=True,
+)
+
+
+@cli.command()
+@click.option(
+    "-o", "--output-directory", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
 )
 @click.option(
     "-a",
@@ -55,6 +67,8 @@ def cli():
     default=False,
     help="create a compressed archive",
 )
+@start_dir_argument
+@config_option
 def dump_documents(
     start_dir: Path, output_directory: Path | None, config_filepath: Path, archive: bool
 ) -> Path:
@@ -85,6 +99,40 @@ def dump_documents(
         logger.info(f"Created compressed archive {archive_path}")
 
     return destination
+
+
+@cli.command()
+@click.option(
+    "-a",
+    "--algorithm",
+    "hash_function",
+    type=click.Choice(["MD5", "SHA1", "SHA256", "SHA512"], case_sensitive=False),
+    help="algorithm to use for the hash function",
+)
+# @click.option(
+#     "-b",
+#     "--block-size",
+#     default=4096,
+#     type=int,
+#     help="block size to read when computing the hash",
+#     show_default=True,
+# )
+@start_dir_argument
+@config_option
+def hashes(start_dir: Path, config_filepath: Path, hash_function: str | None = None):
+    """Compute the hashes of all files in starting from a given directory"""
+    logger = setup_logging()
+    config = load_config(config_filepath)
+    logger.info(config)
+
+    hash_algo = (
+        hash_function if hash_function else get_hash_function(config.hash_function_algorithm)
+    )
+    hashes = calculate_hashes(start_dir, config.extensions, hash_algo)
+    duplicates = get_duplicate_files(hashes)
+    write_hashes(hashes, directory=start_dir)
+    write_duplicates(duplicates, directory=start_dir)
+    logger.info(f"Wrote hashes and duplicates to {start_dir!s}")
 
 
 if __name__ == "__main__":

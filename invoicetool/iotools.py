@@ -141,3 +141,20 @@ def pathify(path: Path | str) -> Path:
     if isinstance(path, str):
         path = Path(path)
     return path.expanduser().resolve()
+
+
+def write_hashes(hashes: dict[str, list[str]], directory: Path):
+    hashes_filepath = directory.parent / "hashes.json"
+    write_json(hashes, hashes_filepath)
+
+
+def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
+    # duplicates = get_duplicate_files(hashes)
+    duplicates_filepath = directory.parent / "duplicates.json"
+    write_json(duplicates, duplicates_filepath)
+
+
+# def write_duplicates_to_file(duplicates: dict[str, list[str]], config: Config) -> None:
+#     """Write the duplicates to a JSON file."""
+#     duplicates_filepath = config.working_directory / today2ymd() / "duplicates.json"
+#     write_json(duplicates, duplicates_filepath)

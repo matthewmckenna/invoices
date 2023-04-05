@@ -1,34 +1,13 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
-import click
-
-from .config import Config
-from .dates_times import today2ymd
-from .iotools import filepaths_with_extensions, write_json
+from .iotools import filepaths_with_extensions
 
 
-@click.command()
-@click.argument(
-    "filename", type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path)
-)
-@click.option(
-    "-a",
-    "--algorithm",
-    "hash_function",
-    type=click.Choice(["MD5", "SHA1", "SHA256", "SHA512"]),
-    default="SHA1",
-    help="algorithm to use for the hash function",
-    case_sensitive=False,
-)
-@click.option(
-    "-b", "--block-size", default=4096, type=int, help="Block size to read when computing the hash."
-)
 def calculate_hash(
     filename: Path | str,
     hash_function: str,
@@ -49,6 +28,7 @@ def calculate_hash(
         hexidecimal representation of secure hash (digest) for given
             hash function.
     """
+    hash_function = hash_function.upper()
     hash_map = {
         "MD5": hashlib.md5(),
         "SHA1": hashlib.sha1(),
@@ -69,32 +49,45 @@ def calculate_hash(
     return hash_fn.hexdigest()
 
 
-def main(directory: Path, config: Config) -> None:
-    """main entry point for the script"""
-    # dictionary to store file hashes
-    hashes = defaultdict(list)
+def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> dict[str, list[str]]:
+    """Return a dictionary of files with duplicate hashes.
 
-    for filepath in filepaths_with_extensions(directory, config.extensions):
-        file_hash = calculate_hash(filepath, config.hash_function_algorithm)
-        hashes[file_hash].append(filepath.as_posix())
+    Args:
+        hashes: dictionary of hashes and the files that have that
+            hash.
 
-    # we only want entries with more than one value
+    Returns:
+        dictionary of duplicate files, keyed by the hash.
+    """
     duplicates = {k: v for k, v in hashes.items() if len(v) > 1}
 
-    # sort the dict by most duplicate files
-    sorted_duplicates = dict(
-        sorted(
-            duplicates.items(),
-            key=lambda d: len(d[1]),
-            reverse=True,
-        )
-    )
-
-    if config.write_duplicates:
-        write_duplicates_to_file(sorted_duplicates)
+    if sort:
+        return dict(sorted(duplicates.items(), key=lambda d: len(d[1]), reverse=True))
+    else:
+        return duplicates
 
 
-def write_duplicates_to_file(duplicates: dict[str, list[str]], config: Config) -> None:
-    """Write the duplicates to a JSON file."""
-    duplicates_filepath = config.working_directory / today2ymd() / "duplicates.json"
-    write_json(duplicates, duplicates_filepath)
+def get_hash_function(config_hash_function: str | None = None) -> str:
+    """Get the hash function for `invoicetool`.
+
+    In order of precedence:
+      - `hash_function_algorithm` in `config.toml`
+      - `sha256`
+    """
+    if config_hash_function:
+        hash_function = config_hash_function
+    else:
+        hash_function = "sha256"
+
+    return hash_function
+
+
+def calculate_hashes(
+    directory: Path, extensions: list[str], hash_function: str
+) -> dict[str, list[str]]:
+    """Calculate the hashes of all files in a directory"""
+    hashes = defaultdict(list)
+    for filepath in filepaths_with_extensions(directory, extensions):
+        file_hash = calculate_hash(filepath, hash_function)
+        hashes[file_hash].append(filepath.as_posix())
+    return hashes
