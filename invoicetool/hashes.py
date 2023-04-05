@@ -72,12 +72,12 @@ def get_hash_function(config_hash_function: str | None = None) -> str:
 
     In order of precedence:
       - `hash_function_algorithm` in `config.toml`
-      - `sha256`
+      - `sha1`
     """
     if config_hash_function:
         hash_function = config_hash_function
     else:
-        hash_function = "sha256"
+        hash_function = "sha1"
 
     return hash_function
 
