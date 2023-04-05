@@ -1,4 +1,4 @@
-.PHONY: black black-check clean clean-logs coverage flake8 format install isort isort-check test
+.PHONY: black black-check clean clean-logs coverage flake8 format install isort isort-check pip-compile test
 
 SHELL := bash
 .ONESHELL:
@@ -50,11 +50,9 @@ flake8:
 
 format: isort black
 
-install:
+install: pip-compile
 	rm -rf $(VENV_DIR)
 	$(SRC_PYTHON) -m venv $(VENV_DIR)
-	$(PIP_COMPILE) --output-file requirements.txt $(PYPROJECT_TOML)
-	$(PIP_COMPILE) --output-file requirements-dev.txt --extra dev $(PYPROJECT_TOML)
 	$(VENV_PIP) install --upgrade pip setuptools
 	$(VENV_PIP) install -r requirements.txt -r requirements-dev.txt
 	$(VENV_PIP) install --editable .
@@ -64,6 +62,10 @@ isort:
 
 isort-check:
 	$(ISORT) --check $(SRC_DIR) $(TESTS_DIR)
+
+pip-compile: requirements.txt requirements-dev.txt
+	$(PIP_COMPILE) --output-file requirements.txt $(PYPROJECT_TOML)
+	$(PIP_COMPILE) --output-file requirements-dev.txt --extra dev $(PYPROJECT_TOML)
 
 test:
 	pytest $(TESTS_DIR)
