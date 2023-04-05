@@ -35,8 +35,14 @@ Goal: Create one-or-more command-line tools to accomplish the following tasks
 ### Acceptance criteria
 - [x] Given a starting directory, find all files with a specific set of extensions
   - [x] Filter temporary Word documents (i.e., name begins with `~$` and the file size is `162 B`)
-- [ ] Filter out duplicates
-- [ ] Create a "manifest" as an intermediate file
+- [x] Find duplicate files using the reverse mapping of filepath to hash
+  - [ ] Generate a report of the duplicate files
+  - [ ] Create a `WordFile` dataclass to represent a Word document
+    - Attributes:
+      - [ ] File size
+      - [ ] Creation date
+      - [ ] Last modified date
+  - [ ] Figure out how to make a decision on which duplicate to keep
 
 ## Usage
 
