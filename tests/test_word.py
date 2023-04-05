@@ -1,15 +1,20 @@
-def test_extract_text_from_doc():
-    # Test with a valid `.doc` file
-    filepath = "path/to/valid/document.doc"
-    expected_output = "This is the extracted text."
-    assert extract_text_from_doc(filepath) == expected_output
+import pytest
 
-    # Test with a non-existent file
-    filepath = "path/to/nonexistent/file.doc"
-    with pytest.raises(ValueError):
-        extract_text_from_doc(filepath)
+from invoicetool.word import extract_text_from_document, extract_text_from_docx
 
-    # Test with a file that is not a `.doc` file
-    filepath = "path/to/invalid/document.txt"
+
+def test_extract_text_from_docx(docx_bytes):
+    expected = "This is the first paragraph.\nThis is the second paragraph."
+    assert extract_text_from_docx(docx_bytes) == expected
+
+
+def test_extract_text_from_docx_non_existent_file(tmp_path):
+    filepath = tmp_path / "nonexistent.docx"
+    with pytest.raises(FileNotFoundError):
+        extract_text_from_docx(filepath)
+
+
+def test_extract_text_from_docx_not_a_docx_file(tmp_path):
+    filepath = tmp_path / "document.txt"
     with pytest.raises(ValueError):
-        extract_text_from_doc(filepath)
+        extract_text_from_document(filepath)

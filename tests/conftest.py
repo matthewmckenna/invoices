@@ -1,6 +1,8 @@
+import io
 from pathlib import Path
 
 import pytest
+from docx import Document
 
 from invoicetool.config import Config
 
@@ -61,3 +63,16 @@ def nested_empty_directories(tmp_path_factory: pytest.TempPathFactory) -> Path:
     path = tmp_path_factory.mktemp("nested")
     (path / "empty1" / "empty2").mkdir(parents=True, exist_ok=True)
     return path
+
+
+@pytest.fixture
+def docx_bytes() -> io.BytesIO:
+    """Create a new in-memory document"""
+    with io.BytesIO() as document_buffer:
+        doc = Document()
+        doc.add_paragraph("This is the first paragraph.")
+        doc.add_paragraph("This is the second paragraph.")
+        doc.save(document_buffer)
+        document_bytes = document_buffer.getvalue()
+
+    return io.BytesIO(document_bytes)
