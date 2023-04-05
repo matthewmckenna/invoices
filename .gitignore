@@ -30,4 +30,4 @@ legacy/notes.md
 logs
 .coverage
 .out
-
+.pytest_cache
