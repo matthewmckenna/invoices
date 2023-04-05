@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from invoicetool.config import Config
@@ -40,3 +42,22 @@ def invoices_dir(tmp_path_factory):
         filepath.touch()
 
     return invoices_dir
+
+
+@pytest.fixture(scope="function")
+def empty_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    empty_dir = tmp_path_factory.mktemp("empty_directory")
+    return empty_dir
+
+
+@pytest.fixture(scope="function")
+def non_empty_directory(tmp_path: Path) -> Path:
+    (tmp_path / "file.txt").touch()
+    return tmp_path
+
+
+@pytest.fixture(scope="function")
+def nested_empty_directories(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    path = tmp_path_factory.mktemp("nested")
+    (path / "empty1" / "empty2").mkdir(parents=True, exist_ok=True)
+    return path

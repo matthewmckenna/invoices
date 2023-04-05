@@ -158,3 +158,31 @@ def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
 #     """Write the duplicates to a JSON file."""
 #     duplicates_filepath = config.working_directory / today2ymd() / "duplicates.json"
 #     write_json(duplicates, duplicates_filepath)
+
+
+def yield_dirs(path: Path) -> Iterator[Path]:
+    """Recursively yield directories starting from `path`"""
+    for entry in path.iterdir():
+        if entry.is_dir():
+            yield from yield_dirs(entry)
+            yield entry
+        else:
+            continue
+
+
+def remove_empty_directories(directory: Path) -> None:
+    """Recursively remove empty directories starting from `directory`"""
+    for subdirectory in yield_dirs(directory):
+        remove_directory_if_empty(subdirectory)
+    remove_directory_if_empty(directory)
+
+
+def directory_is_empty(directory: Path) -> bool:
+    """Return whether or not a directory is empty"""
+    return not next(directory.iterdir(), None)
+
+
+def remove_directory_if_empty(directory: Path) -> None:
+    """Remove the working directory if it's empty"""
+    if directory_is_empty(directory):
+        directory.rmdir()

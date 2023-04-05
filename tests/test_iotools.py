@@ -2,7 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from invoicetool.iotools import ensure_path, pathify
+from invoicetool.iotools import (
+    directory_is_empty,
+    ensure_path,
+    pathify,
+    remove_empty_directories,
+    yield_dirs,
+)
 
 
 def test_ensure_path_new_directory(tmp_path):
@@ -101,3 +107,29 @@ def test_pathify_type():
 #         assert is_empty_file(Path(tmpdirname + "/~$temp.doc")) == True
 
 #         # Test that the regular file is not detected as empty
+
+
+def test_directory_is_empty(empty_directory: Path, non_empty_directory: Path):
+    assert directory_is_empty(empty_directory)
+    assert not directory_is_empty(non_empty_directory)
+
+
+def test_yield_dirs(empty_directory: Path, non_empty_directory: Path):
+    dirs = list(yield_dirs(empty_directory))
+    assert len(dirs) == 0
+
+    dirs = list(yield_dirs(non_empty_directory))
+    assert len(dirs) == 0
+
+
+def test_remove_empty_directories(
+    empty_directory: Path, non_empty_directory: Path, nested_empty_directories: Path
+):
+    remove_empty_directories(empty_directory)
+    assert not empty_directory.exists()
+
+    remove_empty_directories(non_empty_directory)
+    assert non_empty_directory.exists()
+
+    remove_empty_directories(nested_empty_directories)
+    assert not nested_empty_directories.exists()
