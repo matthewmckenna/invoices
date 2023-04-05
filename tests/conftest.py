@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from docx import Document
 
-from invoicetool.config import Config
+from invoicetool.config import Config, get_project_directory
 
 
 @pytest.fixture
@@ -76,3 +76,20 @@ def docx_bytes() -> io.BytesIO:
         document_bytes = document_buffer.getvalue()
 
     return io.BytesIO(document_bytes)
+
+
+@pytest.fixture
+def documents_directory():
+    project_directory = get_project_directory()
+    data_directory = project_directory / "data"
+    return data_directory / "sample-documents"
+
+
+@pytest.fixture
+def real_doc_filepath(documents_directory: Path) -> Path:
+    return documents_directory / "older-format.doc"
+
+
+@pytest.fixture
+def real_docx_filepath(documents_directory: Path) -> Path:
+    return documents_directory / "newer-format.docx"

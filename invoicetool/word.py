@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 import subprocess
 from pathlib import Path
 from typing import Iterable
@@ -34,23 +33,15 @@ def extract_text_from_docx_as_list(filepath: Path) -> list[str]:
     return text_list
 
 
-def extract_text_from_doc(filepath: Path) -> str:
-    """Extract all text from a `.docx` file and return the text"""
-    # process is the completed process
-    process = subprocess.run(
-        ["antiword", filepath.as_posix()],
-        capture_output=True,
-        text=True,
-    )
-    raw_text = process.stdout
-    return multi_whitespace_to_space(raw_text)
+def extract_text_from_doc_as_list(filepath: Path) -> list[str]:
+    """Extract all text from a `.doc` file and return the text"""
+    text = extract_text_from_doc(filepath)
+    return text_to_paragraphs(text)
 
 
-def extract_text_from_docx(filepath: Path) -> str:
-    """Extract all text from a `.docx` file and return the text"""
-    doc = Document(filepath)
-    text = "\n".join(get_paragraphs(doc))
-    return text
+def text_to_paragraphs(text: str) -> list[str]:
+    """Convert a string of text into a list of paragraphs"""
+    return [p for p in text.split("\n") if p]
 
 
 def extract_text_from_document(filepath: Path) -> str:
@@ -61,3 +52,22 @@ def extract_text_from_document(filepath: Path) -> str:
         return extract_text_from_doc(filepath)
     else:
         raise ValueError(f"Unsupported file extension: {filepath.suffix}")
+
+
+def extract_text_from_docx(filepath: Path) -> str:
+    """Extract all text from a `.docx` file and return the text"""
+    doc = Document(filepath)
+    text = "\n".join(get_paragraphs(doc))
+    return text
+
+
+def extract_text_from_doc(filepath: Path) -> str:
+    """Extract all text from a `.doc` file and return the text"""
+    # process is the completed process
+    process = subprocess.run(
+        ["antiword", filepath.as_posix()],
+        capture_output=True,
+        text=True,
+    )
+    raw_text = process.stdout
+    return raw_text.strip()
