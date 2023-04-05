@@ -20,27 +20,24 @@ def ensure_path(path: Path | str):
     return path
 
 
-def scantree(path: Path) -> Iterator[os.DirEntry[str]]:
+def scantree(path: Path) -> Iterator[Path]:
     """Recursively yield `DirEntry` objects for given directory"""
-    for entry in os.scandir(path):
+    for entry in path.iterdir():
         if entry.is_dir():
-            yield from scantree(entry.path)
+            yield from scantree(entry)
         else:
             yield entry
 
 
-def filepaths_with_extensions(directory: Path, extensions: Iterable[str]):
+def filepaths_with_extensions(directory: Path, extensions: Iterable[str]) -> Iterable[Path]:
     """Yield a sequence of absolute filepaths starting from the
     `directory` which match `extensions`.
     """
-    for entry in scantree(directory):
-        p = Path(entry.path)
-
+    for filepath in scantree(directory):
         # skip files with extensions not in `extensions`
-        if p.suffix not in extensions:
+        if filepath.suffix not in extensions:
             continue
-
-        yield pathify(p)
+        yield pathify(filepath)
 
 
 def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
@@ -186,3 +183,13 @@ def remove_directory_if_empty(directory: Path) -> None:
     """Remove the working directory if it's empty"""
     if directory_is_empty(directory):
         directory.rmdir()
+
+
+def generate_manifest(start_dir: Path, output_directory: Path, extensions: Iterable[str]):
+    return sorted(filepaths_with_extensions(start_dir, extensions))
+
+
+def write_manifest(directory: Path, manifest: Iterable[str], today: str):
+    """write the manifest to a file"""
+    manifest_filepath = directory / "manifest.txt"
+    manifest_filepath.write_text("\n".join(manifest) + "\n")
