@@ -72,7 +72,7 @@ config_option = click.option(
 def dump_documents(
     start_dir: Path, output_directory: Path | None, config_filepath: Path, archive: bool
 ) -> Path:
-    """Search for & copy Word documents starting at `START_DIR`"""
+    """Search for & copy Word documents"""
     logger = setup_logging()
     config = load_config(config_filepath)
     logger.info(config)
@@ -120,7 +120,7 @@ def dump_documents(
 @start_dir_argument
 @config_option
 def hashes(start_dir: Path, config_filepath: Path, hash_function: str | None = None):
-    """Compute the hashes of all files in starting from a given directory"""
+    """Compute the hashes of Word documents"""
     logger = setup_logging()
     config = load_config(config_filepath)
     logger.info(config)

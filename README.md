@@ -59,7 +59,8 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  dump-documents  Search for & copy Word documents starting at `START_DIR`
+  dump-documents  Search for & copy Word documents
+  hashes          Compute the hashes of Word documents
 ```
 
 ### Version
@@ -69,6 +70,14 @@ To get the version:
 ```zsh
 ❯ invoicetool --version
 invoicetool, version 0.1.0
+```
+
+### Generate hashes & find duplicates
+
+To calculate hashes for all `.doc` and `.docx` files starting at `START_DIR`, run:
+
+```zsh
+❯ invoicetool hashes START_DIR
 ```
 
 ### Dump documents
