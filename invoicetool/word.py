@@ -28,9 +28,8 @@ def multi_whitespace_to_space(s: str) -> str:
 
 def extract_text_from_docx_as_list(filepath: Path) -> list[str]:
     """Extract all text from a `.docx` file and return a list of paragraphs"""
-    doc = Document(filepath)
-    text_list = list(get_paragraphs(doc))
-    return text_list
+    text = extract_text_from_docx(filepath)
+    return text_to_paragraphs(text)
 
 
 def extract_text_from_doc_as_list(filepath: Path) -> list[str]:
