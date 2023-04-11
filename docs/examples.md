@@ -15,28 +15,27 @@ books
 ├── another-level
 │   ├── document03.doc
 │   └── spreadsheet02.xlsx
+├── doc02.docx
 ├── document01.doc
-├── document02.docx
 └── spreadsheet01.xls
 ```
 
 We run the `dump-documents` command:
 
 ```zsh
-❯ invoicetool dump-documents --output-directory ~/document-dumps books
+❯ invoicetool dump-documents --output-directory ~/document-dumps data/books
 ```
 
-We can go to the `--output-directory` specified above (`~/document-dumps`) and see that the directory structure has been mirrored:
+We can go to the `--output-directory` specified above (`~/document-dumps`), and see that the directory structure has been mirrored under the current date:
 
 ```zsh
 ❯ cd ~
 ❯ tree document-dumps
 document-dumps
-└── books
-    ├── another-level
-    │   ├── document03.doc
-    │   └── spreadsheet02.xlsx
-    ├── document01.doc
-    ├── document02.docx
-    └── spreadsheet01.xls
+└── 2023-04-11
+    └── books
+        ├── another-level
+        │   └── document03.doc
+        ├── doc02.docx
+        └── document01.doc
 ```
