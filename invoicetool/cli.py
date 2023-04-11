@@ -77,7 +77,7 @@ def dump_documents(
     config = load_config(config_filepath)
     logger.info(config)
 
-    working_directory = output_directory if output_directory else get_working_directory()
+    working_directory = output_directory or get_working_directory()
     logger.info(f"Using working directory: {working_directory}")
 
     document_filepaths = list(get_filepaths_of_interest(start_dir, config.extensions))
@@ -125,9 +125,7 @@ def hashes(start_dir: Path, config_filepath: Path, hash_function: str | None = N
     config = load_config(config_filepath)
     logger.info(config)
 
-    hash_algo = (
-        hash_function if hash_function else get_hash_function(config.hash_function_algorithm)
-    )
+    hash_algo = hash_function or get_hash_function(config.hash_function_algorithm)
     hashes = calculate_hashes(start_dir, config.extensions, hash_algo)
     duplicates = get_duplicate_files(hashes)
     write_hashes(hashes, directory=start_dir)
