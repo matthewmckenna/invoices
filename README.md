@@ -102,7 +102,7 @@ To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz
 
 #### Setting the document dump location
 
-The document dump location is constructed from the `working_directory` and the current date.
+The **document dump location** is constructed from the `working_directory` and the current date.
 The `working_directory` can be set in a number of ways.
 In order of precedence, the location can be set by:
 
@@ -112,7 +112,7 @@ In order of precedence, the location can be set by:
 
 If none of the above options are set, the `working_directory` is set to the fallback location: `~/.invoicetool`.
 
-The document dump location is then constructed as:
+The **document dump location** is then constructed as:
 
 ```python
 document_dump_location = working_directory / "YYYY-MM-DD"

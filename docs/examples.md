@@ -5,7 +5,7 @@
 Here's an end-to-end example using the `dump-documents` command of `invoicetool`.
 
 The `dump-documents` command accepts a starting directory (`START_DIR`) and recursively searches for all files of specified type.
-By default, the tool will look for Word documents: [`.doc`, `.docx`].
+By default, the tool will look for Word documents with the following file extensions: [`.doc`, `.docx`].
 
 `books` is a sample directory containing a few Word documents and Excel spreadsheets:
 
@@ -26,7 +26,9 @@ We run the `dump-documents` command:
 ❯ invoicetool dump-documents --output-directory ~/document-dumps data/books
 ```
 
-We can go to the `--output-directory` specified above (`~/document-dumps`), and see that the directory structure has been mirrored under the current date:
+We can go to the `--output-directory` specified above (`~/document-dumps`), and see that the directory structure has been mirrored.
+
+Note that only the Word documents have been copied, and the Excel spreadsheets were ignored as we did not specify to include the extensions `.xls` or `.xlsx`.
 
 ```zsh
 ❯ cd ~

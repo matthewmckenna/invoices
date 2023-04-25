@@ -12,7 +12,7 @@ from .iotools import pathify
 
 @dataclass
 class Config:
-    extensions: list[int]
+    extensions: list[str]
     working_directory: Path
     hash_function_algorithm: str
 

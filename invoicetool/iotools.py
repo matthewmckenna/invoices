@@ -20,7 +20,7 @@ def ensure_path(path: Path | str):
 
 
 def scantree(path: Path) -> Iterator[Path]:
-    """Recursively yield `DirEntry` objects for given directory"""
+    """Recursively yield `Path` objects for given directory"""
     for entry in path.iterdir():
         if entry.is_dir():
             yield from scantree(entry)
@@ -29,9 +29,7 @@ def scantree(path: Path) -> Iterator[Path]:
 
 
 def filepaths_with_extensions(directory: Path, extensions: Iterable[str]) -> Iterable[Path]:
-    """Yield a sequence of absolute filepaths starting from the
-    `directory` which match `extensions`.
-    """
+    """Yield a sequence of absolute filepaths starting from `directory` which match `extensions`."""
     for filepath in scantree(directory):
         # skip files with extensions not in `extensions`
         if filepath.suffix not in extensions:
@@ -84,7 +82,7 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         src = filepath
 
         # path to the new destination file
-        dst = destination / get_relative_filepath(src, destination.stem)
+        dst = destination / get_relative_filepath(src, str(destination.stem))
 
         # create the files parent directory if it doesn't exist
         _ = ensure_path(dst)
@@ -93,7 +91,7 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         shutil.copy2(src, dst)
 
 
-def get_relative_filepath(abs_filepath: Path, start_dir: Path) -> Path:
+def get_relative_filepath(abs_filepath: Path, start_dir: str) -> Path:
     """Get the filepath relative to start_dir"""
     return Path(str(abs_filepath).rsplit(start_dir, maxsplit=1)[-1].lstrip("/"))
 
@@ -111,7 +109,7 @@ def make_archive(destination: Path, *, format: str = "bztar") -> Path:
       - xztar
     """
     archive_path = shutil.make_archive(
-        base_name=destination,
+        base_name=str(destination),
         format=format,
         root_dir=destination.parent,
     )
@@ -120,15 +118,13 @@ def make_archive(destination: Path, *, format: str = "bztar") -> Path:
 
 def write_json(obj: Any, filepath: Path) -> None:
     """Write an object to a JSON file."""
-    if isinstance(filepath, str):
-        filepath = pathify(filepath)
+    filepath = pathify(filepath)
     filepath.write_text(json.dumps(obj, indent=2))
 
 
 def load_json(obj: Any, filepath: Path) -> dict[str, Any]:
     """Load a JSON file into a dictionary."""
-    if isinstance(filepath, str):
-        filepath = pathify(filepath)
+    filepath = pathify(filepath)
     return json.loads(filepath.read_text())
 
 

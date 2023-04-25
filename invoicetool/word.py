@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 from docx import Document
 
+DocxDocument = Any  # mypy doesn't like the docx.Document type
 
-def get_paragraphs(doc: Document) -> Iterable[str]:
+
+def get_paragraphs(doc: DocxDocument) -> Iterable[str]:
     """get all paragraphs from a document"""
     for paragraph in doc.paragraphs:
         p = paragraph.text.strip()
@@ -24,6 +26,16 @@ def get_paragraphs(doc: Document) -> Iterable[str]:
 def multi_whitespace_to_space(s: str) -> str:
     """squeeze multiple whitespace characters into a single space"""
     return " ".join(s.split())
+
+
+def extract_text_from_document_as_list(filepath: Path) -> list[str]:
+    """Extract all text from a document and return the text as a list of paragraphs"""
+    if filepath.suffix == ".docx":
+        return extract_text_from_docx_as_list(filepath)
+    elif filepath.suffix == ".doc":
+        return extract_text_from_doc_as_list(filepath)
+    else:
+        raise ValueError(f"Unsupported file extension: {filepath.suffix}")
 
 
 def extract_text_from_docx_as_list(filepath: Path) -> list[str]:
