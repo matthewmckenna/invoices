@@ -22,3 +22,12 @@ legacy/notes.md
 
 # ignore any database files
 *.db
+
+# virtual environment and build artefacts
+.venv
+*.egg-info/
+
+logs
+.coverage
+.out
+.pytest_cache

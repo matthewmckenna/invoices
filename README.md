@@ -1,49 +1,72 @@
-# invoicesdb
+# Invoice Tool
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/matthewmckenna/invoices/mmk/2023-04-refactor)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/matthewmckenna/invoices)
+![GitHub issues](https://img.shields.io/github/issues/matthewmckenna/invoices)
 
-## TODO
-
-- [x] upgrade project to 3.11.0b3
-
+This project contains a number of utilities for creating an invoices database.
 
 ## Installation
 
-This project is being built with **Python 3.11.0b3**.
+This project is built with **Python 3.11.2**.
 
-To install the project, clone the repository & navigate to the directory.
-
-**Note: This project uses `poetry` and the user will need to install this prior to running `make install`.**
-  - See `howto.md`
+The project can be installed by running:
 
 ```zsh
-git clone git@github.com:matthewmckenna/invoices.git
-cd invoices/
-make install
+❯ git clone git@github.com:matthewmckenna/invoices.git invoicetool
+❯ cd invoicetool
+❯ make install
 ```
 
-## Plan
+This will do the following:
 
-The current plan is to create a number of command-line tools (or a single tool with multiple subcommands) which will
-  - Find all files with a given extension
-  - Create a "manifest" as an intermediate file
-  - Filter out duplicates
-    - There are a number of duplicate files
-    - There are a number of files which are very similar, but may have some extra information at the end
-  - Filter out temporary Word docs, and empty documents
+- Clone the repository into local directory `invoicetool`
+- Change directory into the newly cloned repository
+- Remove any existing virtual environment (in `.venv`) if it exists
+- Create a new virtual environment using Python 3.11.2
+- Updates `pip` and `setuptools`
+- Installs the `invoicetool` project in editable mode
 
-```toml
-[tool.poetry.scripts]
-# package, module, function
-invoicedb = "invoicedb.cli:main"
-```
+## Design
+
+Goal: Create one-or-more command-line tools to accomplish the following tasks
+
+### Acceptance criteria
+- [x] Given a starting directory, find all files with a specific set of extensions
+  - [x] Filter temporary Word documents (i.e., name begins with `~$` and the file size is `162 B`)
+- [x] Find duplicate files using the reverse mapping of filepath to hash
+  - [ ] Generate a report of the duplicate files
+  - [ ] Create a `WordFile` dataclass to represent a Word document
+    - Attributes:
+      - [ ] File size
+      - [ ] Creation date
+      - [ ] Last modified date
+  - [ ] Figure out how to make a decision on which duplicate to keep
 
 ## Usage
 
-We can use this tool on the command line as follows:
+To activate the environent:
 
 ```zsh
-poetry run invoicedb
+❯ source .venv/bin/activate
+```
+
+Run the tool:
+
+```zsh
+❯ invoicetool
+Usage: invoicetool [OPTIONS] COMMAND [ARGS]...
+
+  CLI tools for creating and working with an invoices database
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  dump-documents  Search for & copy Word documents
+  hashes          Compute the hashes of Word documents
 ```
 
 ### Version
@@ -51,58 +74,112 @@ poetry run invoicedb
 To get the version:
 
 ```zsh
-invoicedb --version
-invoicedb, version 0.1.0
+❯ invoicetool --version
+invoicetool, version 0.1.0
 ```
 
+### Generate hashes & find duplicates
 
-### Dump Documents
-
-To dump all `.doc` and `.docx` files starting at `FILEPATH`, run:
-
+To calculate hashes for all `.doc` and `.docx` files starting at `START_DIR`, run:
 
 ```zsh
-poetry run invoicedb dump FILEPATH
+❯ invoicetool hashes START_DIR
+```
+
+### Dump documents
+
+To dump all `.doc` and `.docx` files starting at `START_DIR`, run:
+
+```zsh
+❯ invoicetool dump-documents START_DIR
 ```
 
 To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
 
 ```zsh
-poetry run invoicedb dump FILEPATH --archive
+❯ invoicetool dump-documents --archive START_DIR
 ```
 
-### Run Tests
+#### Setting the document dump location
 
-To run the test suite:
+The **document dump location** is constructed from the `working_directory` and the current date.
+The `working_directory` can be set in a number of ways.
+In order of precedence, the location can be set by:
+
+1. Supplying the `-o` or `--output-directory` option to the `dump-documents` command
+2. Setting the `INVOICETOOL_WORKING_DIR` environment variable
+3. Setting the `working_directory` option in the `config.toml` file
+
+If none of the above options are set, the `working_directory` is set to the fallback location: `~/.invoicetool`.
+
+The **document dump location** is then constructed as:
+
+```python
+document_dump_location = working_directory / "YYYY-MM-DD"
+```
+
+#### Examples
+
+This section demonstrates a number of ways to set the document dump location.
+To see a full end-to-end example of the `dump-documents` command see [this section](docs/examples.md#e2e-example-dump-documents).
+
+To set the document dump location using the `-o` or `--output-directory` option:
 
 ```zsh
-make test
+❯ invoicetool dump-documents --output-directory DOCUMENT_DUMP_LOCATION START_DIR
 ```
 
-## Development
+----
 
-### Using the project during development
-
-- <https://stackoverflow.com/questions/55063392/poetry-manage-python-package-cli>
-- allows `click` & `poetry` to work together nicely
-
-### Add a dependency
+To set the document dump location using the `INVOICETOOL_WORKING_DIR` environment variable:
 
 ```zsh
-poetry add {dependency}
+❯ export INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION
+❯ invoicetool dump-documents START_DIR
 ```
 
-### Add a development dependency
+or to set the environment variable for the current session only:
 
 ```zsh
-poetry add {dependency} --dev
+❯ INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION invoicetool dump-documents START_DIR
 ```
 
-## Installing using pip
+----
 
-**TODO: decide on how to include requirements.txt**
-  - Maybe use `pip-tools`
+To set the document dump location using the `working_directory` option in the `config.toml` file:
+
+```toml
+working_directory = "DOCUMENT_DUMP_LOCATION"
+```
+
+## Linting & Formatting
+
+### Formatting
+
+To format the source and tests:
 
 ```zsh
-python -m pip install -r requirements.txt
+❯ make format
 ```
+
+This will run `isort` and `black` on the source and tests.
+
+### Run tests
+
+To run the tests:
+
+```zsh
+❯ make test
+```
+
+This will run all tests within the `tests` directory.
+
+### Coverage
+
+To run the tests and generate a coverage report:
+
+```zsh
+❯ make coverage
+```
+
+Running `make coverage` will generate a coverage report in the `htmlcov` directory, and then open the report in the browser.
