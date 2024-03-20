@@ -49,7 +49,9 @@ def test_document_dump_with_archive(invoices_dir, tmp_path, capsys):
         tf.list(verbose=False)
     output = capsys.readouterr().out.rstrip()
 
-    dumped_document_filepaths = [p for p in output.splitlines() if Path(p.rstrip()).suffix]
+    dumped_document_filepaths = [
+        p for p in output.splitlines() if Path(p.rstrip()).suffix
+    ]
 
     assert result.exit_code == 0
     assert expected_archive_filepath.exists()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """CLI tools for creating and working with an invoices database"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -58,7 +59,9 @@ config_option = click.option(
 
 @cli.command()
 @click.option(
-    "-o", "--output-directory", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
+    "-o",
+    "--output-directory",
+    type=click.Path(resolve_path=True, path_type=Path, file_okay=False),
 )
 @click.option(
     "-a",

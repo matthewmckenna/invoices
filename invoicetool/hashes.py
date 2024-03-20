@@ -49,7 +49,9 @@ def calculate_hash(
     return hash_fn.hexdigest()
 
 
-def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> dict[str, list[str]]:
+def get_duplicate_files(
+    hashes: dict[str, list[str]], *, sort: bool = True
+) -> dict[str, list[str]]:
     """Return a dictionary of files with duplicate hashes.
 
     Args:

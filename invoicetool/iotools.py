@@ -28,7 +28,9 @@ def scantree(path: Path) -> Iterator[Path]:
             yield entry
 
 
-def filepaths_with_extensions(directory: Path, extensions: Iterable[str]) -> Iterable[Path]:
+def filepaths_with_extensions(
+    directory: Path, extensions: Iterable[str]
+) -> Iterable[Path]:
     """Yield a sequence of absolute filepaths starting from `directory` which match `extensions`."""
     for filepath in scantree(directory):
         # skip files with extensions not in `extensions`
@@ -37,7 +39,9 @@ def filepaths_with_extensions(directory: Path, extensions: Iterable[str]) -> Ite
         yield pathify(filepath)
 
 
-def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterator[Path]:
+def get_filepaths_of_interest(
+    target: Path, extensions: Iterable[str]
+) -> Iterator[Path]:
     """Yield a sequence of absolute filepaths starting from the
     `target` directory which match `extensions`.
     """
@@ -47,7 +51,9 @@ def get_filepaths_of_interest(target: Path, extensions: Iterable[str]) -> Iterat
         yield filepath
 
 
-def remove_temporary_word_files(directory: Path, *, dry_run: bool = False, logger: logging.Logger):
+def remove_temporary_word_files(
+    directory: Path, *, dry_run: bool = False, logger: logging.Logger
+):
     """recursively scan for and remove any temporary ms word files"""
     # Hard-code the extensions as we're removing specific file types
     extensions = {".doc", ".docx"}
@@ -180,7 +186,9 @@ def remove_directory_if_empty(directory: Path) -> None:
         directory.rmdir()
 
 
-def generate_manifest(start_dir: Path, output_directory: Path, extensions: Iterable[str]):
+def generate_manifest(
+    start_dir: Path, output_directory: Path, extensions: Iterable[str]
+):
     return sorted(filepaths_with_extensions(start_dir, extensions))
 
 
