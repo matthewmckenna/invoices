@@ -19,20 +19,13 @@ uv pip compile --generate-hashes pyproject.toml -o requirements.txt
 uv pip compile --extra dev --generate-hashes pyproject.toml -o requirements-dev.txt
 ```
 
-This will do the following:
-
-- Clone the repository into local directory `invoicetool`
-- Change directory into the newly cloned repository
-- Remove any existing virtual environment (in `.venv`) if it exists
-- Create a new virtual environment using Python 3.11.2
-- Updates `pip` and `setuptools`
-- Installs the `invoicetool` project in editable mode
 
 ## Design
 
 Goal: Create one-or-more command-line tools to accomplish the following tasks
 
 ### Acceptance criteria
+
 - [x] Given a starting directory, find all files with a specific set of extensions
   - [x] Filter temporary Word documents (i.e., name begins with `~$` and the file size is `162 B`)
 - [x] Find duplicate files using the reverse mapping of filepath to hash
@@ -45,14 +38,6 @@ Goal: Create one-or-more command-line tools to accomplish the following tasks
   - [ ] Figure out how to make a decision on which duplicate to keep
 
 ## Usage
-
-To activate the environent:
-
-```zsh
-❯ source .venv/bin/activate
-```
-
-Run the tool:
 
 ```zsh
 ❯ invoicetool
@@ -156,30 +141,16 @@ working_directory = "DOCUMENT_DUMP_LOCATION"
 
 ### Formatting
 
-To format the source and tests:
-
 ```zsh
 ❯ make format
 ```
 
-This will run `isort` and `black` on the source and tests.
+This will run `ruff format`.
 
 ### Run tests
-
-To run the tests:
 
 ```zsh
 ❯ make test
 ```
 
 This will run all tests within the `tests` directory.
-
-### Coverage
-
-To run the tests and generate a coverage report:
-
-```zsh
-❯ make coverage
-```
-
-Running `make coverage` will generate a coverage report in the `htmlcov` directory, and then open the report in the browser.
