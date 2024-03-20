@@ -9,14 +9,17 @@ This project contains a number of utilities for creating an invoices database.
 
 ## Installation
 
-This project is built with **Python 3.11.2**.
+This project is built with **Python 3.12.2**.
 
 The project can be installed by running:
 
-```zsh
-❯ git clone git@github.com:matthewmckenna/invoices.git invoicetool
-❯ cd invoicetool
-❯ make install
+```shell
+pyenv shell 3.12.2
+uv venv
+source .venv/bin/activate
+uv pip install -e '.[dev]'
+uv pip compile --generate-hashes pyproject.toml -o requirements.txt
+uv pip compile --extra dev --generate-hashes pyproject.toml -o requirements-dev.txt
 ```
 
 This will do the following:
