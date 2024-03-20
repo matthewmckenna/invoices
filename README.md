@@ -1,9 +1,6 @@
 # Invoice Tool
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/matthewmckenna/invoices/mmk/2023-04-refactor)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/matthewmckenna/invoices)
-![GitHub issues](https://img.shields.io/github/issues/matthewmckenna/invoices)
+![Dynamic TOML Badge](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmatthewmckenna%2Finvoices%2Fmmk%2F2024-03-refresh%2Fpyproject.toml&query=%24.project.version&label=version)
 
 This project contains a number of utilities for creating an invoices database.
 
