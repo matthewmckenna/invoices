@@ -10,14 +10,21 @@ from invoicetool.dates_times import ymdhms_now
 from invoicetool.iotools import pathify
 
 
-def setup_logging(
+def get_logger(
     *,
     logger_name: str | None = "dev",
-    config_filepath: Path | str | None = Config.default_config_filepath,
+    config_filepath: Path | str | None = None,
 ) -> logging.Logger:
     """Configure logging"""
-    logging_config = load_logging_config_dict(config_filepath)
-    logs_directory = pathify(Config.project_directory) / "logs"
+    _config = (
+        Config.from_file(config_filepath)
+        if config_filepath is not None
+        else Config.default()
+    )
+    logging_config = load_logging_config_dict(
+        config_filepath or _config._DEFAULT_CONFIG_PATH
+    )
+    logs_directory = pathify(_config.project_directory) / "logs"
     logging_config["handlers"]["file_handler"]["filename"] = (
         logs_directory / f"{ymdhms_now()}.log"
     ).as_posix()

@@ -4,16 +4,16 @@ from pathlib import Path
 import pytest
 from docx import Document
 
-from invoicetool.config import Config, get_project_directory
+from invoicetool.config import Config
 
 
 @pytest.fixture
 def config(tmp_path_factory) -> Config:
     """Return a default config object"""
-    working_dir = tmp_path_factory.mktemp("working_dir")
+    output_dir = tmp_path_factory.mktemp("output_dir")
     return Config(
-        extensions=[".doc", ".docx"],
-        working_directory=working_dir,
+        extensions={".doc", ".docx"},
+        output_directory=output_dir,
         hash_function_algorithm="sha1",
     )
 
@@ -82,7 +82,7 @@ def docx_bytes() -> io.BytesIO:
 
 @pytest.fixture
 def documents_directory():
-    project_directory = get_project_directory()
+    project_directory = Config.project_directory
     data_directory = project_directory / "data"
     return data_directory / "sample-documents"
 

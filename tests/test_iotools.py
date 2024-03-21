@@ -4,7 +4,8 @@ import pytest
 
 from invoicetool.iotools import (
     directory_is_empty,
-    ensure_path,
+    ensure_dir,
+    get_relative_filepath,
     pathify,
     remove_empty_directories,
     yield_dirs,
@@ -12,13 +13,13 @@ from invoicetool.iotools import (
 
 
 def test_ensure_path_new_directory(tmp_path):
-    path = ensure_path(tmp_path / "new_directory")
+    path = ensure_dir(tmp_path / "new_directory")
     assert path.exists()
     assert path.is_dir()
 
 
 def test_ensure_path_existing_directory(tmp_path):
-    path = ensure_path(tmp_path)
+    path = ensure_dir(tmp_path)
     assert path.exists()
     assert path.is_dir()
 
@@ -133,3 +134,21 @@ def test_remove_empty_directories(
 
     remove_empty_directories(nested_empty_directories)
     assert not nested_empty_directories.exists()
+
+
+def test_relative_path_same_directory():
+    assert get_relative_filepath(Path("/home/user/file.txt"), "/home/user") == Path(
+        "file.txt"
+    )
+
+
+def test_relative_path_subdirectory():
+    assert get_relative_filepath(
+        Path("/home/user/subdir/file.txt"), "/home/user"
+    ) == Path("subdir/file.txt")
+
+
+def test_relative_path_no_common_directory():
+    assert get_relative_filepath(
+        Path("/home/user/file.txt"), "/home/otheruser"
+    ) == Path("/home/user/file.txt")

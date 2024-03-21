@@ -6,7 +6,6 @@ import shutil
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
-
 # def ensure_path(path: Path | str):
 #     """Ensure that a directory exists, creating if needed"""
 #     if isinstance(path, str):
@@ -17,7 +16,7 @@ from typing import Any, Iterable, Iterator
 #     return path
 
 
-def ensure_dir(path: Path | str):
+def ensure_dir(path: Path | str) -> None:
     """Ensure that a directory exists, creating if needed"""
     pathify(path).mkdir(exist_ok=True, parents=True)
 
@@ -31,9 +30,7 @@ def scantree(path: Path) -> Iterator[Path]:
             yield entry
 
 
-def filepaths_with_extensions(
-    directory: Path, extensions: Iterable[str]
-) -> Iterable[Path]:
+def filepaths_with_extensions(directory: Path, extensions: set[str]) -> Iterable[Path]:
     """Yield a sequence of absolute filepaths starting from `directory` which match `extensions`."""
     for filepath in scantree(directory):
         # skip files with extensions not in `extensions`
@@ -42,13 +39,11 @@ def filepaths_with_extensions(
         yield pathify(filepath)
 
 
-def get_filepaths_of_interest(
-    target: Path, extensions: Iterable[str]
-) -> Iterator[Path]:
+def get_filepaths_of_interest(directory: Path, extensions: set[str]) -> Iterator[Path]:
     """Yield a sequence of absolute filepaths starting from the
     `target` directory which match `extensions`.
     """
-    for filepath in filepaths_with_extensions(target, extensions):
+    for filepath in filepaths_with_extensions(directory, extensions):
         if is_empty_file(filepath):
             continue
         yield filepath
@@ -91,10 +86,10 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         src = filepath
 
         # path to the new destination file
-        dst = destination / get_relative_filepath(src, str(destination.stem))
+        dst = destination / get_relative_filepath(src, str(destination.name))
 
-        # create the files parent directory if it doesn't exist
-        _ = ensure_path(dst)
+        # create the parent directory if it doesn't exist
+        ensure_dir(dst.parent)
 
         # copy the file from `src` to `dst`
         shutil.copy2(src, dst)
