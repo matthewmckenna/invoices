@@ -1,95 +1,87 @@
-from __future__ import annotations
-
-import json
-import os
-import tomllib
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import ClassVar
 
-from .iotools import pathify
+import tomllib
+
+from invoicetool.iotools import pathify
 
 
 @dataclass
 class Config:
-    extensions: list[str]
-    working_directory: Path
+    _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[list[str]] = [".doc", ".docx"]
+    _DEFAULT_CONFIG_PATH: ClassVar[str] = "./config.toml"
+    _DEFAULT_WORKING_DIRECTORY: ClassVar[str] = "~/.invoicetool"
+    _DEFAULT_HASH_FUNCTION_ALGORITHM: ClassVar[str] = "sha1"
+
     hash_function_algorithm: str
+    working_directory: Path
+    extensions: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         self.working_directory = pathify(self.working_directory)
 
+    @classmethod
+    def from_dict(cls, d) -> "Config":
+        return cls(**d)
 
-def get_project_directory() -> Path:
-    """Return the project directory path.
+    def to_dict(self):
+        return asdict(self)
 
-    The project directory is used to find the `config.toml`
-    file, and to create the `logs` directory.
+    @classmethod
+    def default(cls) -> "Config":
+        return cls(
+            extensions=cls._DEFAULT_EXTENSION_ALLOW_LIST,
+            working_directory=cls._DEFAULT_WORKING_DIRECTORY,
+            hash_function_algorithm=cls._DEFAULT_HASH_FUNCTION_ALGORITHM,
+        )
 
-    The directory tree for this file is as follows:
+    @property
+    def project_directory(self) -> Path:
+        """Return the project directory path.
 
-    invoicetool_project  # project directory / repository
-    └── invoicetool
-        └── config.py
+        The project directory is used to find the `config.toml`
+        file, and to create the `logs` directory.
 
-    Path(__file__) == Path("config.py")
-    Path(__file__).parent == Path("invoicetool")
-    Path(__file__).parent.parent == Path("invoicetool_project")
-    """
-    return Path(__file__).parent.parent
+        The directory tree for this file is as follows:
 
+        invoicetool_project  # project directory / repository
+        └── invoicetool
+            └── config.py
 
-def get_default_config_filepath() -> Path:
-    """Return the default config filepath"""
-    project_directory = get_project_directory()
-    return project_directory / "config.toml"
+        Path(__file__) == Path("config.py")
+        Path(__file__).parent == Path("invoicetool")
+        Path(__file__).parent.parent == Path("invoicetool_project")
+        """
+        return Path(__file__).parent.parent
 
+    @property
+    def default_config_filepath(self) -> Path:
+        """Return the default config filepath"""
+        return self.project_directory / self._DEFAULT_CONFIG_PATH
 
-def load_config(filepath: Path | str) -> Config:
-    """Load a config file and return as a Config object"""
-    config_dict = load_config_dict(filepath)
-    return Config(**config_dict["invoicetool"])
-
-
-def load_config_dict(filepath: Path | str) -> dict[str, Any]:
-    """Load a config file and return as a dict.
-
-    Supported file formats:
-      - TOML
-      - JSON
-    """
-    if isinstance(filepath, str):
-        filepath = Path(filepath)
-    with open(filepath, "rb") as f:
-        if filepath.suffix == ".toml":
-            config_dict = tomllib.load(f)
-        elif filepath.suffix == ".json":
-            config_dict = json.load(f)
-        else:
-            raise ValueError(f"Unsupported file format: {filepath.suffix}")
-    return config_dict
+    @classmethod
+    def from_file(cls, path: str | None = None) -> "Config":
+        path = cls._DEFAULT_CONFIG_PATH if path is None else path
+        with open(path, "rb") as f:
+            config_dict = tomllib.load(f)["invoicetool"]
+        return cls.from_dict(config_dict)
 
 
-def load_logging_config_dict(filepath: Path | str) -> dict[str, Any]:
-    """Load a logging config file and return as a dict"""
-    config_dict = load_config_dict(filepath)
-    return config_dict["log"]
+# def get_working_directory(config: Config | None = None) -> Path:
+#     """Get the working directory for `invoicetool`.
 
+#     In order of precedence:
+#       - `INVOICETOOL_WORKING_DIR` environment variable
+#       - `working_directory` in `config.toml`
+#       - `~/.invoicetool`
+#     """
+#     env_working_dir = os.getenv("INVOICETOOL_WORKING_DIR")
+#     if env_working_dir:
+#         working_directory = Path(env_working_dir)
+#     elif config and config.working_directory:
+#         working_directory = Path(config.working_directory)
+#     else:
+#         working_directory = Path.home() / ".invoicetool"
 
-def get_working_directory(config: Config | None = None) -> Path:
-    """Get the working directory for `invoicetool`.
-
-    In order of precedence:
-      - `INVOICETOOL_WORKING_DIR` environment variable
-      - `working_directory` in `config.toml`
-      - `~/.invoicetool`
-    """
-    env_working_dir = os.getenv("INVOICETOOL_WORKING_DIR")
-    if env_working_dir:
-        working_directory = Path(env_working_dir)
-    elif config and config.working_directory:
-        working_directory = Path(config.working_directory)
-    else:
-        working_directory = Path.home() / ".invoicetool"
-
-    return working_directory.expanduser().resolve()
+#     return working_directory.expanduser().resolve()

@@ -7,16 +7,19 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 
-def ensure_path(path: Path | str):
+# def ensure_path(path: Path | str):
+#     """Ensure that a directory exists, creating if needed"""
+#     if isinstance(path, str):
+#         path = Path(path)
+#     if "." in path.name:
+#         path = path.parent
+#     ensure_dir(path)
+#     return path
+
+
+def ensure_dir(path: Path | str):
     """Ensure that a directory exists, creating if needed"""
-    if isinstance(path, str):
-        path = Path(path)
-
-    if "." in path.name:
-        path = path.parent
-
     pathify(path).mkdir(exist_ok=True, parents=True)
-    return path
 
 
 def scantree(path: Path) -> Iterator[Path]:

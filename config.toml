@@ -21,6 +21,7 @@ stream = "ext://sys.stdout"
 class = "logging.FileHandler"
 # level = "DEBUG"
 formatter = "simple"
+# this gets overwritten after calling `setup_logging()`
 filename = "output.log"
 mode = "w"
 encoding = "utf-8"
