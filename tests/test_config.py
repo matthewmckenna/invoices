@@ -4,7 +4,7 @@ from invoicetool.config import Config
 
 
 def test_default_working_directory(config: Config):
-    assert config.output_directory == Path.home() / ".invoicetool"
+    assert config.base_output_directory == Path.home() / ".invoicetool"
 
 
 # def test_env_var_working_directory(monkeypatch, tmp_path):

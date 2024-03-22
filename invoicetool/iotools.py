@@ -81,6 +81,8 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
     `destination` is the parent directory where the original
     directory structure will be mirrored to.
     """
+    # make sure the destination directory exists
+    ensure_dir(destination)
     for filepath in filepaths:
         # path to the original file
         src = filepath
@@ -139,15 +141,15 @@ def pathify(path: Path | str) -> Path:
     return path.expanduser().resolve()
 
 
-def write_hashes(hashes: dict[str, list[str]], directory: Path):
-    hashes_filepath = directory.parent / "hashes.json"
-    write_json(hashes, hashes_filepath)
+# def write_hashes(hashes: dict[str, list[str]], directory: Path):
+#     hashes_filepath = directory.parent / "hashes.json"
+#     write_json(hashes, hashes_filepath)
 
 
-def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
-    # duplicates = get_duplicate_files(hashes)
-    duplicates_filepath = directory.parent / "duplicates.json"
-    write_json(duplicates, duplicates_filepath)
+# def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
+#     # duplicates = get_duplicate_files(hashes)
+#     duplicates_filepath = directory.parent / "duplicates.json"
+#     write_json(duplicates, duplicates_filepath)
 
 
 # def write_duplicates_to_file(duplicates: dict[str, list[str]], config: Config) -> None:
@@ -196,5 +198,32 @@ def write_manifest(directory: Path, manifest: Iterable[str], today: str):
     manifest_filepath.write_text("\n".join(manifest) + "\n")
 
 
-def build_destination_directory(output_directory: Path, start_dir: Path) -> Path:
-    return output_directory / today2ymd() / start_dir.name
+def build_output_directory(
+    base_output_directory: Path, starting_directory: Path
+) -> Path:
+    return base_output_directory / today2ymd() / starting_directory.name
+
+
+def remove_directory_with_files_matching_extensions(
+    directory: Path,
+    extensions: set[str],
+    logger: logging.Logger,
+    *,
+    dry_run: bool = True,
+):
+    """Remove a directory and all files within it which match `extensions`."""
+    filepaths = sorted(scantree(directory))
+    n_files = len(filepaths)
+
+    # TODO: if n_files > threshold then switch to interactive & require input
+    logger.debug(f"⚠️  Found {n_files} files to be deleted in {pathify(directory)!s}")
+
+    # check that all files match extensions
+    if additional_extensions := ({f.suffix for f in filepaths} - extensions):
+        raise ValueError(
+            f"Found additional extensions in {directory}. Ensure that any files matching extensions {additional_extensions} are removed."
+        )
+
+    if not dry_run:
+        logger.debug(f"🗑️  Removing {n_files} files in {pathify(directory)!s}")
+        shutil.rmtree(directory)

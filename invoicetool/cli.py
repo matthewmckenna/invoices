@@ -8,16 +8,16 @@ import click
 from invoicetool import __version__
 from invoicetool.config import Config
 from invoicetool.dates_times import today2ymd
-from invoicetool.hashes import calculate_hashes, get_duplicate_files, get_hash_function
+from invoicetool.hashes import calculate_hashes, get_duplicate_files
 from invoicetool.iotools import (
-    build_destination_directory,
+    build_output_directory,
     copy_files,
     ensure_dir,
     get_filepaths_of_interest,
     make_archive,
     pathify,
-    write_duplicates,
-    write_hashes,
+    remove_directory_with_files_matching_extensions,
+    write_json,
 )
 from invoicetool.log import get_logger
 
@@ -42,6 +42,12 @@ def cli():
 #     log.warn("Remove invoicedb directory", directory=directory)
 #     # shutil.rmtree(directory)
 
+base_output_directory_option = click.option(
+    "-o",
+    "--output-directory",
+    "base_output_directory",
+    type=click.Path(resolve_path=True, path_type=Path, file_okay=False),
+)
 start_dir_argument = click.argument(
     "start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
 )
@@ -58,11 +64,7 @@ config_option = click.option(
 
 
 @cli.command()
-@click.option(
-    "-o",
-    "--output-directory",
-    type=click.Path(resolve_path=True, path_type=Path, file_okay=False),
-)
+@base_output_directory_option
 @click.option(
     "-a",
     "--archive",
@@ -75,7 +77,7 @@ config_option = click.option(
 def dump_documents(
     start_dir: Path,
     archive: bool,
-    output_directory: Path | None = None,
+    base_output_directory: Path | None = None,
     config_filepath: Path | None = None,
 ) -> None:
     """Search for & copy Word documents"""
@@ -86,29 +88,36 @@ def dump_documents(
     # the `~` doesn't get expanded with `click.Path`
     start_dir = pathify(start_dir)
 
-    # command-line arguments take precedence over config file
-    output_directory = pathify(output_directory) or config.output_directory
-    logger.info(f"→ output directory: {output_directory}")
+    base_output_directory_ = (
+        pathify(base_output_directory)
+        if base_output_directory is not None
+        else config.base_output_directory
+    )
+    # output_directory_ = base_output_directory / YYYY-MM-DD / START_DIR
+    output_directory_ = build_output_directory(base_output_directory_, start_dir)
 
     document_filepaths = list(get_filepaths_of_interest(start_dir, config.extensions))
     num_documents = len(document_filepaths)
     logger.info(f"→ found {num_documents} documents of interest")
     logger.debug(f"→ documents: {document_filepaths}")
 
-    # destination = output_directory / YYYY-MM-DD / START_DIR
-    destination_directory = build_destination_directory(output_directory, start_dir)
+    copy_files(output_directory_, document_filepaths)
 
     if archive:
         # TODO: allow configuration of compression format via config file and command line option
-        archive_path = make_archive(destination_directory)
+        archive_path = make_archive(output_directory_)
+        # we don't need the uncompressed directory anymore so remove it
+        remove_directory_with_files_matching_extensions(
+            output_directory_,
+            extensions=config.extensions,
+            dry_run=False,
+            logger=logger,
+        )
         logger.info(
             f"→ created compressed archive with {num_documents} documents at {archive_path}"
         )
     else:
-        ensure_dir(destination_directory)
-        logger.info(f"→ destination directory: {destination_directory}")
-        copy_files(destination_directory, document_filepaths)
-        logger.info(f"→ copied {num_documents} documents to {destination_directory}")
+        logger.info(f"→ copied {num_documents} documents to {output_directory_}")
 
 
 @cli.command()
@@ -122,25 +131,52 @@ def dump_documents(
 # @click.option(
 #     "-b",
 #     "--block-size",
-#     default=4096,
+#     default=8192,
 #     type=int,
 #     help="block size to read when computing the hash",
 #     show_default=True,
 # )
+@base_output_directory_option
 @start_dir_argument
 @config_option
-def hashes(start_dir: Path, config_filepath: Path, hash_function: str | None = None):
+def hashes(
+    start_dir: Path,
+    base_output_directory: Path | None = None,
+    config_filepath: Path | None = None,
+    hash_function: str | None = None,
+):
     """Compute the hashes of Word documents"""
     logger = get_logger()
     config = Config.from_file(config_filepath)
     logger.info(config)
 
-    hash_algo = hash_function or get_hash_function(config.hash_function_algorithm)
+    # the `~` doesn't get expanded with `click.Path`
+    start_dir = pathify(start_dir)
+
+    base_output_directory_ = (
+        pathify(base_output_directory)
+        if base_output_directory is not None
+        else config.base_output_directory
+    )
+    output_directory_ = build_output_directory(base_output_directory_, start_dir)
+
+    hash_algo = hash_function or config.hash_function_algorithm
     hashes = calculate_hashes(start_dir, config.extensions, hash_algo)
     duplicates = get_duplicate_files(hashes)
-    write_hashes(hashes, directory=start_dir)
-    write_duplicates(duplicates, directory=start_dir)
-    logger.info(f"Wrote hashes and duplicates to {start_dir!s}")
+    write_json(hashes, output_directory_.parent / "hashes.json")
+    write_json(duplicates, output_directory_.parent / "duplicates.json")
+    logger.info(f"Wrote hashes and duplicates to {output_directory_!s}")
+
+
+# def write_hashes(hashes: dict[str, list[str]], directory: Path):
+#     hashes_filepath = directory.parent / "hashes.json"
+#     write_json(hashes, hashes_filepath)
+
+
+# def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
+#     # duplicates = get_duplicate_files(hashes)
+#     duplicates_filepath = directory.parent / "duplicates.json"
+#     write_json(duplicates, duplicates_filepath)
 
 
 if __name__ == "__main__":

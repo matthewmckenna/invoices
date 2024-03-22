@@ -26,12 +26,12 @@ def test_document_dump(invoices_dir, tmp_path):
     )
     assert result.exit_code == 0
     # check if one of the documents created above exists
-    assert (tmp_path / today2ymd() / invoices_dir.stem / "document02.docx").exists()
+    assert (tmp_path / today2ymd() / invoices_dir.name / "document02.docx").exists()
 
 
 def test_document_dump_with_archive(invoices_dir, tmp_path, capsys):
     runner = CliRunner()
-    destination = tmp_path / today2ymd() / invoices_dir.stem
+    destination = tmp_path / today2ymd() / invoices_dir.name
     expected_archive_filepath = Path(f"{destination}.tar.bz2")
 
     result = runner.invoke(

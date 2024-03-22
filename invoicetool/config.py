@@ -11,19 +11,20 @@ from invoicetool.iotools import ensure_dir, pathify
 class Config:
     _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[set[str]] = {".doc", ".docx"}
     _DEFAULT_CONFIG_PATH: ClassVar[str] = "./config.toml"
-    _DEFAULT_OUTPUT_DIRECTORY: ClassVar[str] = "~/.invoicetool"
+    _DEFAULT_BASE_OUTPUT_DIRECTORY: ClassVar[str] = "~/.invoicetool"
     _DEFAULT_HASH_FUNCTION_ALGORITHM: ClassVar[str] = "sha1"
 
     hash_function_algorithm: str
-    output_directory: Path
+    base_output_directory: Path
     extensions: set[str] = field(default_factory=set)
 
     def __post_init__(self):
-        self.output_directory = pathify(self.output_directory)
-        ensure_dir(self.output_directory)
+        self.base_output_directory = pathify(self.base_output_directory)
+        self.extensions = set(self.extensions)
+        ensure_dir(self.base_output_directory)
 
     def __str__(self):
-        return f"Config(output_directory={self.output_directory}, extensions={self.extensions}, hash_function={self.hash_function_algorithm})"
+        return f"Config(base_output_directory={self.base_output_directory}, extensions={self.extensions}, hash_function={self.hash_function_algorithm})"
 
     @classmethod
     def from_dict(cls, d) -> "Config":
@@ -36,7 +37,7 @@ class Config:
     def default(cls) -> "Config":
         return cls(
             extensions=cls._DEFAULT_EXTENSION_ALLOW_LIST,
-            output_directory=cls._DEFAULT_OUTPUT_DIRECTORY,
+            base_output_directory=cls._DEFAULT_BASE_OUTPUT_DIRECTORY,
             hash_function_algorithm=cls._DEFAULT_HASH_FUNCTION_ALGORITHM,
         )
 
