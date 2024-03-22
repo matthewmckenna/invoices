@@ -10,10 +10,12 @@ from invoicetool.config import Config
 from invoicetool.dates_times import today2ymd
 from invoicetool.hashes import calculate_hashes, get_duplicate_files, get_hash_function
 from invoicetool.iotools import (
+    build_destination_directory,
     copy_files,
     ensure_dir,
     get_filepaths_of_interest,
     make_archive,
+    pathify,
     write_duplicates,
     write_hashes,
 )
@@ -81,8 +83,11 @@ def dump_documents(
     config = Config.from_file(config_filepath)
     logger.info(config)
 
+    # the `~` doesn't get expanded with `click.Path`
+    start_dir = pathify(start_dir)
+
     # command-line arguments take precedence over config file
-    output_directory = output_directory or config.output_directory
+    output_directory = pathify(output_directory) or config.output_directory
     logger.info(f"→ output directory: {output_directory}")
 
     document_filepaths = list(get_filepaths_of_interest(start_dir, config.extensions))
@@ -91,7 +96,7 @@ def dump_documents(
     logger.debug(f"→ documents: {document_filepaths}")
 
     # destination = output_directory / YYYY-MM-DD / START_DIR
-    destination_directory = output_directory / today2ymd() / start_dir.name
+    destination_directory = build_destination_directory(output_directory, start_dir)
 
     if archive:
         # TODO: allow configuration of compression format via config file and command line option

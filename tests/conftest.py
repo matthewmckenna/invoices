@@ -7,19 +7,14 @@ from docx import Document
 from invoicetool.config import Config
 
 
-@pytest.fixture
-def config(tmp_path_factory) -> Config:
+@pytest.fixture(scope="session")
+def config() -> Config:
     """Return a default config object"""
-    output_dir = tmp_path_factory.mktemp("output_dir")
-    return Config(
-        extensions={".doc", ".docx"},
-        output_directory=output_dir,
-        hash_function_algorithm="sha1",
-    )
+    return Config.default()
 
 
 @pytest.fixture(scope="session")
-def invoices_dir(tmp_path_factory):
+def invoices_dir(tmp_path_factory: pytest.TempPathFactory):
     """Create a simple directory structure with different filetypes.
 
     Directory structure:
@@ -50,8 +45,7 @@ def invoices_dir(tmp_path_factory):
 
 @pytest.fixture(scope="function")
 def empty_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    empty_dir = tmp_path_factory.mktemp("empty_directory")
-    return empty_dir
+    return tmp_path_factory.mktemp("empty_directory")
 
 
 @pytest.fixture(scope="function")
@@ -81,10 +75,8 @@ def docx_bytes() -> io.BytesIO:
 
 
 @pytest.fixture
-def documents_directory():
-    project_directory = Config.project_directory
-    data_directory = project_directory / "data"
-    return data_directory / "sample-documents"
+def documents_directory(config: Config):
+    return config.project_directory / "data" / "sample-documents"
 
 
 @pytest.fixture

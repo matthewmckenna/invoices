@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 import json
 import logging
 import shutil
 from pathlib import Path
 from typing import Any, Iterable, Iterator
+
+from invoicetool.dates_times import today2ymd
 
 # def ensure_path(path: Path | str):
 #     """Ensure that a directory exists, creating if needed"""
@@ -86,7 +86,7 @@ def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
         src = filepath
 
         # path to the new destination file
-        dst = destination / get_relative_filepath(src, str(destination.name))
+        dst = destination / get_relative_filepath(src, destination.name)
 
         # create the parent directory if it doesn't exist
         ensure_dir(dst.parent)
@@ -194,3 +194,7 @@ def write_manifest(directory: Path, manifest: Iterable[str], today: str):
     """write the manifest to a file"""
     manifest_filepath = directory / "manifest.txt"
     manifest_filepath.write_text("\n".join(manifest) + "\n")
+
+
+def build_destination_directory(output_directory: Path, start_dir: Path) -> Path:
+    return output_directory / today2ymd() / start_dir.name
