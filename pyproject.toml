@@ -26,6 +26,10 @@ dev = [
     "ruff == 0.3.3"
     # "pytest-cov == 4.0.0"
 ]
+manifest-analysis = [
+    "jupyterlab == 4.1.5",
+    "pandas == 2.2.1",
+]
 
 [project.scripts]
 invoicetool = "invoicetool.cli:cli"

@@ -15,9 +15,10 @@ The project can be installed by running:
 pyenv shell 3.12.2
 uv venv
 source .venv/bin/activate
-uv pip install -e '.[dev]'
+uv pip install -e '.[dev,manifest-analysis]'
 uv pip compile --generate-hashes pyproject.toml -o requirements.txt
 uv pip compile --extra dev --generate-hashes pyproject.toml -o requirements-dev.txt
+uv pip compile --extra dev --extra manifest-analysis --generate-hashes pyproject.toml -o requirements-manifest-analysis.txt
 ```
 
 
