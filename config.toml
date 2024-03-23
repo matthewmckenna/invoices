@@ -1,8 +1,8 @@
 [invoicetool]
-# a list of extensions that we're interested in searching for
+# extensions that we're interested in searching for
 extensions = [".doc", ".docx"]
-# the working directory where the invoice database, and document dumps will be located
-working_directory = "~/.invoicetool"
+# base output directory where the invoice database and document dumps will be located
+base_output_directory = "~/.invoicetool"
 hash_function_algorithm = "sha1"
 
 [log]
@@ -21,6 +21,7 @@ stream = "ext://sys.stdout"
 class = "logging.FileHandler"
 # level = "DEBUG"
 formatter = "simple"
+# this gets overwritten after calling `setup_logging()`
 filename = "output.log"
 mode = "w"
 encoding = "utf-8"

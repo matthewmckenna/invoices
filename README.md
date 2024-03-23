@@ -1,40 +1,34 @@
 # Invoice Tool
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/matthewmckenna/invoices/mmk/2023-04-refactor)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/matthewmckenna/invoices)
-![GitHub issues](https://img.shields.io/github/issues/matthewmckenna/invoices)
+![Dynamic TOML Badge](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmatthewmckenna%2Finvoices%2Fmmk%2F2024-03-refresh%2Fpyproject.toml&query=%24.project.version&label=version)
 
 This project contains a number of utilities for creating an invoices database.
 
+
 ## Installation
 
-This project is built with **Python 3.11.2**.
+This project is built with **Python 3.12.2**.
 
 The project can be installed by running:
 
-```zsh
-❯ git clone git@github.com:matthewmckenna/invoices.git invoicetool
-❯ cd invoicetool
-❯ make install
+```shell
+pyenv shell 3.12.2
+uv venv
+source .venv/bin/activate
+uv pip install -e '.[dev]'
+uv pip compile --generate-hashes pyproject.toml -o requirements.txt
+uv pip compile --extra dev --generate-hashes pyproject.toml -o requirements-dev.txt
 ```
 
-This will do the following:
-
-- Clone the repository into local directory `invoicetool`
-- Change directory into the newly cloned repository
-- Remove any existing virtual environment (in `.venv`) if it exists
-- Create a new virtual environment using Python 3.11.2
-- Updates `pip` and `setuptools`
-- Installs the `invoicetool` project in editable mode
 
 ## Design
 
 Goal: Create one-or-more command-line tools to accomplish the following tasks
 
 ### Acceptance criteria
+
 - [x] Given a starting directory, find all files with a specific set of extensions
-  - [x] Filter temporary Word documents (i.e., name begins with `~$` and the file size is `162 B`)
+  - [x] Filter out temporary Word documents (i.e., name begins with `~$` and the file size is `162 B`)
 - [x] Find duplicate files using the reverse mapping of filepath to hash
   - [ ] Generate a report of the duplicate files
   - [ ] Create a `WordFile` dataclass to represent a Word document
@@ -44,15 +38,8 @@ Goal: Create one-or-more command-line tools to accomplish the following tasks
       - [ ] Last modified date
   - [ ] Figure out how to make a decision on which duplicate to keep
 
+
 ## Usage
-
-To activate the environent:
-
-```zsh
-❯ source .venv/bin/activate
-```
-
-Run the tool:
 
 ```zsh
 ❯ invoicetool
@@ -80,7 +67,7 @@ invoicetool, version 0.1.0
 
 ### Generate hashes & find duplicates
 
-To calculate hashes for all `.doc` and `.docx` files starting at `START_DIR`, run:
+To calculate hashes for all files which match `extensions` starting at `START_DIR` (default: `.doc` and `.docx`), run:
 
 ```zsh
 ❯ invoicetool hashes START_DIR
@@ -88,13 +75,13 @@ To calculate hashes for all `.doc` and `.docx` files starting at `START_DIR`, ru
 
 ### Dump documents
 
-To dump all `.doc` and `.docx` files starting at `START_DIR`, run:
+To dump all files which match `extensions` starting at `START_DIR` (default: `.doc` and `.docx`), run:
 
 ```zsh
 ❯ invoicetool dump-documents START_DIR
 ```
 
-To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz2`, use the `-a` or `--archive` option:
+To create a compressed archive of the document dump use the `-a` or `--archive` option:
 
 ```zsh
 ❯ invoicetool dump-documents --archive START_DIR
@@ -102,28 +89,29 @@ To also create a compressed archive of the dump with filename `YYYY-MM-DD.tar.bz
 
 #### Setting the document dump location
 
-The **document dump location** is constructed from the `working_directory` and the current date.
-The `working_directory` can be set in a number of ways.
+The **document dump location** is built from the `output_directory` and the current date.
+The `output_directory` can be set in a few ways.
 In order of precedence, the location can be set by:
 
 1. Supplying the `-o` or `--output-directory` option to the `dump-documents` command
-2. Setting the `INVOICETOOL_WORKING_DIR` environment variable
-3. Setting the `working_directory` option in the `config.toml` file
+2. Setting the `base_output_directory` option in the `config.toml` file
 
-If none of the above options are set, the `working_directory` is set to the fallback location: `~/.invoicetool`.
+If none of the above options are set, the `output_directory` defaults to: `~/.invoicetool`.
 
 The **document dump location** is then constructed as:
 
 ```python
-document_dump_location = working_directory / "YYYY-MM-DD"
+document_dump_location = output_directory / YYYY-MM-DD / START_DIR.name
 ```
+
+where `START_DIR.name` is the final component of the `START_DIR` path.
 
 #### Examples
 
-This section demonstrates a number of ways to set the document dump location.
+This section demonstrates a few ways to set the document dump location.
 To see a full end-to-end example of the `dump-documents` command see [this section](docs/examples.md#e2e-example-dump-documents).
 
-To set the document dump location using the `-o` or `--output-directory` option:
+Using the `-o` or `--output-directory` option at the command line:
 
 ```zsh
 ❯ invoicetool dump-documents --output-directory DOCUMENT_DUMP_LOCATION START_DIR
@@ -131,55 +119,27 @@ To set the document dump location using the `-o` or `--output-directory` option:
 
 ----
 
-To set the document dump location using the `INVOICETOOL_WORKING_DIR` environment variable:
-
-```zsh
-❯ export INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION
-❯ invoicetool dump-documents START_DIR
-```
-
-or to set the environment variable for the current session only:
-
-```zsh
-❯ INVOICETOOL_WORKING_DIR=DOCUMENT_DUMP_LOCATION invoicetool dump-documents START_DIR
-```
-
-----
-
-To set the document dump location using the `working_directory` option in the `config.toml` file:
+Using the `base_output_directory` option in the `config.toml` file:
 
 ```toml
-working_directory = "DOCUMENT_DUMP_LOCATION"
+[invoicetool]
+base_output_directory = "DOCUMENT_DUMP_LOCATION"
 ```
 
-## Linting & Formatting
+## Development
 
 ### Formatting
 
-To format the source and tests:
+To format the project using `ruff`:
 
 ```zsh
 ❯ make format
 ```
 
-This will run `isort` and `black` on the source and tests.
-
 ### Run tests
 
-To run the tests:
+To run the tests using `pytest`:
 
 ```zsh
 ❯ make test
 ```
-
-This will run all tests within the `tests` directory.
-
-### Coverage
-
-To run the tests and generate a coverage report:
-
-```zsh
-❯ make coverage
-```
-
-Running `make coverage` will generate a coverage report in the `htmlcov` directory, and then open the report in the browser.

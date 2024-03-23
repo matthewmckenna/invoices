@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import hashlib
 from collections import defaultdict
 from functools import partial
@@ -12,7 +10,7 @@ def calculate_hash(
     filename: Path | str,
     hash_function: str,
     *,
-    block_size: int = 4096,
+    block_size: int = 8192,
 ) -> str:
     """Return the hash for `filename`.
 
@@ -49,7 +47,9 @@ def calculate_hash(
     return hash_fn.hexdigest()
 
 
-def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> dict[str, list[str]]:
+def get_duplicate_files(
+    hashes: dict[str, list[str]], *, sort: bool = True
+) -> dict[str, list[str]]:
     """Return a dictionary of files with duplicate hashes.
 
     Args:
@@ -65,21 +65,6 @@ def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> d
         return dict(sorted(duplicates.items(), key=lambda d: len(d[1]), reverse=True))
     else:
         return duplicates
-
-
-def get_hash_function(config_hash_function: str | None = None) -> str:
-    """Get the hash function for `invoicetool`.
-
-    In order of precedence:
-      - `hash_function_algorithm` in `config.toml`
-      - `sha1`
-    """
-    if config_hash_function:
-        hash_function = config_hash_function
-    else:
-        hash_function = "sha1"
-
-    return hash_function
 
 
 def calculate_hashes(

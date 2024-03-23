@@ -4,7 +4,8 @@ import pytest
 
 from invoicetool.iotools import (
     directory_is_empty,
-    ensure_path,
+    ensure_dir,
+    get_relative_filepath,
     pathify,
     remove_empty_directories,
     yield_dirs,
@@ -12,13 +13,15 @@ from invoicetool.iotools import (
 
 
 def test_ensure_path_new_directory(tmp_path):
-    path = ensure_path(tmp_path / "new_directory")
+    path = tmp_path / "new_directory"
+    ensure_dir(path)
     assert path.exists()
     assert path.is_dir()
 
 
 def test_ensure_path_existing_directory(tmp_path):
-    path = ensure_path(tmp_path)
+    path = tmp_path
+    ensure_dir(path)
     assert path.exists()
     assert path.is_dir()
 
@@ -28,7 +31,6 @@ def test_ensure_path_existing_directory(tmp_path):
     [
         ("~/test", Path.home() / "test"),
         ("~/test/../test/./", Path.home() / "test"),
-        ("~/non_existent", Path.home() / "non_existent"),
         ("/non/existent/path", Path("/non/existent/path")),
     ],
 )
@@ -133,3 +135,36 @@ def test_remove_empty_directories(
 
     remove_empty_directories(nested_empty_directories)
     assert not nested_empty_directories.exists()
+
+
+@pytest.mark.parametrize(
+    "filepath, starting_directory, expected_filepath",
+    [
+        (Path("/Users/user/invoice.doc"), Path("/Users/user"), Path("invoice.doc")),
+        (
+            Path("/Users/user/2024/invoice3.docx"),
+            Path("/Users/user"),
+            Path("2024/invoice3.docx"),
+        ),
+        (
+            Path("/Users/user/books/some_dir/invoice5.doc"),
+            Path("/Users/user/books"),
+            Path("some_dir/invoice5.doc"),
+        ),
+        (
+            Path("/Volumes/External SSD/Archive/2021/invoice0.doc"),
+            Path("/Volumes/External SSD"),
+            Path("Archive/2021/invoice0.doc"),
+        ),
+        (
+            Path("/Users/user/books/invoice-in-cwd.docx"),
+            Path("/Users/user/books"),
+            Path("invoice-in-cwd.docx"),
+        ),
+    ],
+)
+def test_get_relative_filepath(filepath, starting_directory, expected_filepath):
+    assert (
+        get_relative_filepath(Path(filepath), str(starting_directory.name))
+        == expected_filepath
+    )

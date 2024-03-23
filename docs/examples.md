@@ -2,10 +2,10 @@
 
 ## E2E Example: `dump-documents`
 
-Here's an end-to-end example using the `dump-documents` command of `invoicetool`.
+Here's an end-to-end example using the `dump-documents` command.
 
-The `dump-documents` command accepts a starting directory (`START_DIR`) and recursively searches for all files of specified type.
-By default, the tool will look for Word documents with the following file extensions: [`.doc`, `.docx`].
+The `dump-documents` command accepts a starting directory (`START_DIR`) and recursively searches for all files which match extensions specified in `extensions`.
+By default, the tool will look for Word documents with the following file extensions: `{.doc, .docx}`.
 
 `books` is a sample directory containing a few Word documents and Excel spreadsheets:
 
@@ -20,7 +20,7 @@ books
 └── spreadsheet01.xls
 ```
 
-We run the `dump-documents` command:
+Run the `dump-documents` command:
 
 ```zsh
 ❯ invoicetool dump-documents --output-directory ~/document-dumps data/books
