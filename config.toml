@@ -1,7 +1,7 @@
 [invoicetool]
-# a list of extensions that we're interested in searching for
+# extensions that we're interested in searching for
 extensions = [".doc", ".docx"]
-# the base output directory where the invoice database, and document dumps will be located
+# base output directory where the invoice database and document dumps will be located
 base_output_directory = "~/.invoicetool"
 hash_function_algorithm = "sha1"
 

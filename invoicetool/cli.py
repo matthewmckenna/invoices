@@ -165,7 +165,7 @@ def hashes(
     duplicates = get_duplicate_files(hashes)
     write_json(hashes, output_directory_.parent / "hashes.json")
     write_json(duplicates, output_directory_.parent / "duplicates.json")
-    logger.info(f"Wrote hashes and duplicates to {output_directory_!s}")
+    logger.info(f"Wrote hashes and duplicates to {output_directory_.parent!s}")
 
 
 # def write_hashes(hashes: dict[str, list[str]], directory: Path):
