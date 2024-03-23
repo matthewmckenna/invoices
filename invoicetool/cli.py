@@ -7,12 +7,10 @@ import click
 
 from invoicetool import __version__
 from invoicetool.config import Config
-from invoicetool.dates_times import today2ymd
 from invoicetool.hashes import calculate_hashes, get_duplicate_files
 from invoicetool.iotools import (
     build_output_directory,
     copy_files,
-    ensure_dir,
     get_filepaths_of_interest,
     make_archive,
     pathify,
@@ -28,20 +26,6 @@ def cli():
     """CLI tools for creating and working with an invoices database"""
 
 
-# @cli.command()
-# @click.option(
-#     "-d",
-#     "--directory",
-#     # default=lambda get_path():,
-#     help="directory to remove",
-#     type=click.Path(resolve_path=True, path_type=Path),
-# )
-# def delete_invoicedb(directory: Path):
-#     """Delete all files in INVOICE_DB_DIR"""
-#     directory = directory or get_path()
-#     log.warn("Remove invoicedb directory", directory=directory)
-#     # shutil.rmtree(directory)
-
 base_output_directory_option = click.option(
     "-o",
     "--output-directory",
@@ -51,15 +35,12 @@ base_output_directory_option = click.option(
 start_dir_argument = click.argument(
     "start_dir", type=click.Path(resolve_path=True, path_type=Path, file_okay=False)
 )
-# TODO: revisit this
 config_option = click.option(
     "-c",
     "--config",
     "config_filepath",
     type=click.Path(resolve_path=True, path_type=Path, dir_okay=False),
     help="path to config file",
-    # default="./config.toml",
-    # show_default=True,
 )
 
 
@@ -166,17 +147,6 @@ def hashes(
     write_json(hashes, output_directory_.parent / "hashes.json")
     write_json(duplicates, output_directory_.parent / "duplicates.json")
     logger.info(f"Wrote hashes and duplicates to {output_directory_.parent!s}")
-
-
-# def write_hashes(hashes: dict[str, list[str]], directory: Path):
-#     hashes_filepath = directory.parent / "hashes.json"
-#     write_json(hashes, hashes_filepath)
-
-
-# def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
-#     # duplicates = get_duplicate_files(hashes)
-#     duplicates_filepath = directory.parent / "duplicates.json"
-#     write_json(duplicates, duplicates_filepath)
 
 
 if __name__ == "__main__":

@@ -71,22 +71,3 @@ class Config:
         with open(path, "rb") as f:
             config_dict = tomllib.load(f)["invoicetool"]
         return cls.from_dict(config_dict)
-
-
-# def get_working_directory(config: Config | None = None) -> Path:
-#     """Get the working directory for `invoicetool`.
-
-#     In order of precedence:
-#       - `INVOICETOOL_WORKING_DIR` environment variable
-#       - `working_directory` in `config.toml`
-#       - `~/.invoicetool`
-#     """
-#     env_working_dir = os.getenv("INVOICETOOL_WORKING_DIR")
-#     if env_working_dir:
-#         working_directory = Path(env_working_dir)
-#     elif config and config.working_directory:
-#         working_directory = Path(config.working_directory)
-#     else:
-#         working_directory = Path.home() / ".invoicetool"
-
-#     return working_directory.expanduser().resolve()

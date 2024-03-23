@@ -128,34 +128,11 @@ def write_json(obj: Any, filepath: Path) -> None:
     filepath.write_text(json.dumps(obj, indent=2))
 
 
-def load_json(obj: Any, filepath: Path) -> dict[str, Any]:
-    """Load a JSON file into a dictionary."""
-    filepath = pathify(filepath)
-    return json.loads(filepath.read_text())
-
-
 def pathify(path: Path | str) -> Path:
     """Return an absolute Path object with the home directory expanded"""
     if isinstance(path, str):
         path = Path(path)
     return path.expanduser().resolve()
-
-
-# def write_hashes(hashes: dict[str, list[str]], directory: Path):
-#     hashes_filepath = directory.parent / "hashes.json"
-#     write_json(hashes, hashes_filepath)
-
-
-# def write_duplicates(duplicates: dict[str, list[str]], directory: Path):
-#     # duplicates = get_duplicate_files(hashes)
-#     duplicates_filepath = directory.parent / "duplicates.json"
-#     write_json(duplicates, duplicates_filepath)
-
-
-# def write_duplicates_to_file(duplicates: dict[str, list[str]], config: Config) -> None:
-#     """Write the duplicates to a JSON file."""
-#     duplicates_filepath = config.working_directory / today2ymd() / "duplicates.json"
-#     write_json(duplicates, duplicates_filepath)
 
 
 def yield_dirs(path: Path) -> Iterator[Path]:
@@ -164,8 +141,6 @@ def yield_dirs(path: Path) -> Iterator[Path]:
         if entry.is_dir():
             yield from yield_dirs(entry)
             yield entry
-        else:
-            continue
 
 
 def remove_empty_directories(directory: Path) -> None:
@@ -190,12 +165,6 @@ def generate_manifest(
     start_dir: Path, output_directory: Path, extensions: Iterable[str]
 ):
     return sorted(filepaths_with_extensions(start_dir, extensions))
-
-
-def write_manifest(directory: Path, manifest: Iterable[str], today: str):
-    """write the manifest to a file"""
-    manifest_filepath = directory / "manifest.txt"
-    manifest_filepath.write_text("\n".join(manifest) + "\n")
 
 
 def build_output_directory(
