@@ -9,7 +9,7 @@ This project contains a number of utilities for creating an invoices database.
 
 This project is built with **Python 3.12.2**.
 
-The project can be installed by running:
+The project can be installed (with all requirements) by running:
 
 ```shell
 pyenv shell 3.12.2

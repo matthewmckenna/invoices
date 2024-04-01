@@ -3,7 +3,17 @@ from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
-from .iotools import filepaths_with_extensions
+
+def calculate_hashes(
+    paths: list[Path],
+    hash_function: str,
+) -> dict[str, list[str]]:
+    """Calculate the hashes of all files in a directory"""
+    hashes = defaultdict(list)
+    for path in paths:
+        file_hash = calculate_hash(path, hash_function)
+        hashes[file_hash].append(path.as_posix())
+    return hashes
 
 
 def calculate_hash(
@@ -45,34 +55,3 @@ def calculate_hash(
             hash_fn.update(chunk)
 
     return hash_fn.hexdigest()
-
-
-def get_duplicate_files(
-    hashes: dict[str, list[str]], *, sort: bool = True
-) -> dict[str, list[str]]:
-    """Return a dictionary of files with duplicate hashes.
-
-    Args:
-        hashes: dictionary of hashes and the files that have that
-            hash.
-
-    Returns:
-        dictionary of duplicate files, keyed by the hash.
-    """
-    duplicates = {k: v for k, v in hashes.items() if len(v) > 1}
-
-    if sort:
-        return dict(sorted(duplicates.items(), key=lambda d: len(d[1]), reverse=True))
-    else:
-        return duplicates
-
-
-def calculate_hashes(
-    directory: Path, extensions: list[str], hash_function: str
-) -> dict[str, list[str]]:
-    """Calculate the hashes of all files in a directory"""
-    hashes = defaultdict(list)
-    for filepath in filepaths_with_extensions(directory, extensions):
-        file_hash = calculate_hash(filepath, hash_function)
-        hashes[file_hash].append(filepath.as_posix())
-    return hashes

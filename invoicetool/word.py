@@ -1,31 +1,17 @@
-from __future__ import annotations
-
 import subprocess
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Iterator
 
 from docx import Document
 
-DocxDocument = Any  # mypy doesn't like the docx.Document type
 
-
-def get_paragraphs(doc: DocxDocument) -> Iterable[str]:
-    """get all paragraphs from a document"""
+def get_paragraphs(doc: Document) -> Iterator[str]:
+    """get all paragraphs from a docx document"""
     for paragraph in doc.paragraphs:
         p = paragraph.text.strip()
-
-        # get rid of blank lines
         if not p:
             continue
-
-        # TODO: maybe call generic `sanitise` which
-        # does multiple cleaning operations
-        yield multi_whitespace_to_space(p)
-
-
-def multi_whitespace_to_space(s: str) -> str:
-    """squeeze multiple whitespace characters into a single space"""
-    return " ".join(s.split())
+        yield " ".join(p.split())
 
 
 def extract_text_from_document_as_list(filepath: Path) -> list[str]:

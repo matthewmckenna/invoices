@@ -1,10 +1,82 @@
 import json
 import logging
 import shutil
+from dataclasses import asdict, dataclass
+from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 from invoicetool.dates_times import today2ymd
+from invoicetool.hashes import calculate_hash
+
+
+class FileFormat(StrEnum):
+    DOC: str = auto()
+    DOCX: str = auto()
+
+    @classmethod
+    def from_str(cls, s: str) -> "FileFormat":
+        filetype_ = s.strip().lower()
+        for supported_filetype in cls.__members__.values():
+            if filetype_ == supported_filetype.value:
+                return supported_filetype
+        supported_filetypes = list(cls.__members__.keys())
+        raise ValueError(
+            f"unknown file type: {filetype_} (supported file types: {supported_filetypes})"
+        )
+
+
+@dataclass
+class File:
+    name: str
+    original_path: str
+    md5: str
+    sha1: str
+    modification_time: float | int
+    size: int
+
+    def to_dict(self):
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(**d)
+
+
+def get_files_of_interest(
+    path: Path,
+    *,
+    extensions: set[str] | None = None,
+    filter_empty_files: bool = False,
+    exclude_directories: set[str] | None = None,
+) -> Iterator[Path]:
+    for entry in path.iterdir():
+        # TODO: this may not be right
+        original_path = Path(*entry.parts[5:])
+        if exclude_directories and any(
+            original_path.match(exclude_directory)
+            for exclude_directory in exclude_directories
+        ):
+            continue
+        if entry.is_dir():
+            yield from get_files_of_interest(
+                entry,
+                extensions=extensions,
+                filter_empty_files=filter_empty_files,
+                exclude_directories=exclude_directories,
+            )
+        elif extensions is None or entry.suffix in extensions:
+            if not filter_empty_files or not is_empty_file(entry):
+                stat_info = entry.stat()
+                yield File(
+                    name=entry.name,
+                    original_path=original_path.as_posix(),
+                    md5=calculate_hash(entry, "md5"),
+                    sha1=calculate_hash(entry, "sha1"),
+                    modification_time=stat_info.st_mtime,
+                    size=stat_info.st_size,
+                )
+
 
 # def ensure_path(path: Path | str):
 #     """Ensure that a directory exists, creating if needed"""
@@ -196,3 +268,23 @@ def remove_directory_with_files_matching_extensions(
     if not dry_run:
         logger.debug(f"🗑️  Removing {n_files} files in {pathify(directory)!s}")
         shutil.rmtree(directory)
+
+
+def get_duplicate_files(
+    hashes: dict[str, list[str]], *, sort: bool = True
+) -> dict[str, list[str]]:
+    """Return a dictionary of files with duplicate hashes.
+
+    Args:
+        hashes: dictionary of hashes and the files that have that
+            hash.
+
+    Returns:
+        dictionary of duplicate files, keyed by the hash.
+    """
+    duplicates = {k: v for k, v in hashes.items() if len(v) > 1}
+
+    if sort:
+        return dict(sorted(duplicates.items(), key=lambda d: len(d[1]), reverse=True))
+    else:
+        return duplicates
