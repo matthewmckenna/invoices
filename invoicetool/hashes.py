@@ -18,8 +18,8 @@ def calculate_hashes(
 
 def calculate_hash(
     filename: Path | str,
-    hash_function: str,
     *,
+    hash_function: str = "sha1",
     block_size: int = 8192,
 ) -> str:
     """Return the hash for `filename`.
@@ -36,12 +36,11 @@ def calculate_hash(
         hexidecimal representation of secure hash (digest) for given
             hash function.
     """
-    hash_function = hash_function.upper()
     hash_map = {
-        "MD5": hashlib.md5(),
-        "SHA1": hashlib.sha1(),
-        "SHA256": hashlib.sha256(),
-        "SHA512": hashlib.sha512(),
+        "md5": hashlib.md5(),
+        "sha1": hashlib.sha1(),
+        "sha256": hashlib.sha256(),
+        "sha512": hashlib.sha512(),
     }
 
     # Raise a ValueError if an invalid hash function is passed in.

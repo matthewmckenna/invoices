@@ -1,13 +1,17 @@
 import json
 import logging
 import shutil
-from dataclasses import asdict, dataclass
 from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 from invoicetool.dates_times import today2ymd
 from invoicetool.hashes import calculate_hash
+from invoicetool.word import (
+    TEMPORARY_MS_WORD_DOCUMENT_BYTES,
+    WordDocument,
+    get_text_from_docx,
+)
 
 
 class FileFormat(StrEnum):
@@ -25,57 +29,61 @@ class FileFormat(StrEnum):
             f"unknown file type: {filetype_} (supported file types: {supported_filetypes})"
         )
 
-
-@dataclass
-class File:
-    name: str
-    original_path: str
-    md5: str
-    sha1: str
-    modification_time: float | int
-    size: int
-
-    def to_dict(self):
-        return asdict(self)
-
     @classmethod
-    def from_dict(cls, d):
-        return cls(**d)
+    def word_docs_default_extensions(cls) -> set[str]:
+        return {f".{file_format.lower()}" for file_format in cls.__members__.keys()}
 
 
-def get_files_of_interest(
+def get_word_documents(
     path: Path,
     *,
-    extensions: set[str] | None = None,
-    filter_empty_files: bool = False,
+    hash_function: str = "sha1",
+    extensions: set[str] | None = FileFormat.word_docs_default_extensions(),
+    filter_empty_files: bool = True,
     exclude_directories: set[str] | None = None,
-) -> Iterator[Path]:
+    filter_seen: bool = True,
+    seen_file_hashes: set[str] | None = None,
+) -> Iterator[WordDocument]:
+    if seen_file_hashes is None:
+        seen_file_hashes = set()
+
     for entry in path.iterdir():
-        # TODO: this may not be right
-        original_path = Path(*entry.parts[5:])
+        # TODO: clean this up later
+        original_path = Path(*entry.parts[9:])
         if exclude_directories and any(
             original_path.match(exclude_directory)
             for exclude_directory in exclude_directories
         ):
             continue
         if entry.is_dir():
-            yield from get_files_of_interest(
+            yield from get_word_documents(
                 entry,
+                hash_function=hash_function,
                 extensions=extensions,
                 filter_empty_files=filter_empty_files,
                 exclude_directories=exclude_directories,
+                filter_seen=filter_seen,
+                seen_file_hashes=seen_file_hashes,
             )
         elif extensions is None or entry.suffix in extensions:
             if not filter_empty_files or not is_empty_file(entry):
                 stat_info = entry.stat()
-                yield File(
+                entry_as_posix = entry.as_posix()
+                file_hash = calculate_hash(entry, hash_function=hash_function)
+                text = get_text_from_docx(entry_as_posix)
+                if filter_seen and file_hash in seen_file_hashes:
+                    continue
+                yield WordDocument(
                     name=entry.name,
-                    original_path=original_path.as_posix(),
-                    md5=calculate_hash(entry, "md5"),
-                    sha1=calculate_hash(entry, "sha1"),
                     modification_time=stat_info.st_mtime,
                     size=stat_info.st_size,
+                    hash=file_hash,
+                    original_path=original_path.as_posix(),
+                    text=text,
+                    _hash_type=hash_function,
+                    _path=entry_as_posix,
                 )
+                seen_file_hashes.add(file_hash)
 
 
 # def ensure_path(path: Path | str):
@@ -143,7 +151,14 @@ def is_empty_file(path: Path) -> bool:
 
     Files which match these criteria are empty temporary MS Word documents.
     """
-    return path.name.startswith("~$") and path.stat().st_size == 162
+    return (
+        path.stat().st_size == 0
+        or path.stat().st_size == 162
+        and (
+            path.name.startswith("~$")
+            or path.read_bytes() == TEMPORARY_MS_WORD_DOCUMENT_BYTES
+        )
+    )
 
 
 def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
@@ -242,7 +257,12 @@ def generate_manifest(
 def build_output_directory(
     base_output_directory: Path, starting_directory: Path
 ) -> Path:
-    return base_output_directory / today2ymd() / starting_directory.name
+    return build_ymd_output_directory(base_output_directory) / starting_directory.name
+
+
+def build_ymd_output_directory(base_output_directory: Path) -> Path:
+    """Return a Path with a directory structure of `base_output_directory/YYYY-MM-DD`."""
+    return base_output_directory / today2ymd()
 
 
 def remove_directory_with_files_matching_extensions(

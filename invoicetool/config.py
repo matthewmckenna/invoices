@@ -4,12 +4,14 @@ from typing import ClassVar
 
 import tomllib
 
-from invoicetool.iotools import ensure_dir, pathify
+from invoicetool.iotools import FileFormat, ensure_dir, pathify
 
 
 @dataclass
 class Config:
-    _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[set[str]] = {".doc", ".docx"}
+    _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[set[str]] = (
+        FileFormat.word_docs_default_extensions()
+    )
     _DEFAULT_CONFIG_PATH: ClassVar[str] = "./config.toml"
     _DEFAULT_BASE_OUTPUT_DIRECTORY: ClassVar[str] = "~/.invoicetool"
     _DEFAULT_HASH_FUNCTION_ALGORITHM: ClassVar[str] = "sha1"
@@ -17,10 +19,14 @@ class Config:
     hash_function_algorithm: str
     base_output_directory: Path
     extensions: set[str] = field(default_factory=set)
+    exclude_directories: set[str] = field(default_factory=set)
+    include_directories: set[str] = field(default_factory=set)
 
     def __post_init__(self):
         self.base_output_directory = pathify(self.base_output_directory)
         self.extensions = set(self.extensions)
+        self.exclude_directories = set(self.exclude_directories)
+        self.include_directories = set(self.include_directories)
         ensure_dir(self.base_output_directory)
 
     def __str__(self):
@@ -39,6 +45,8 @@ class Config:
             extensions=cls._DEFAULT_EXTENSION_ALLOW_LIST,
             base_output_directory=cls._DEFAULT_BASE_OUTPUT_DIRECTORY,
             hash_function_algorithm=cls._DEFAULT_HASH_FUNCTION_ALGORITHM,
+            exclude_directories=set(),
+            include_directories=set(),
         )
 
     @property
