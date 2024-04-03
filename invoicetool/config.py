@@ -21,14 +21,14 @@ class Config:
     extensions: set[str] = field(default_factory=set)
     exclude_directories: set[str] = field(default_factory=set)
     include_directories: set[str] = field(default_factory=set)
-    exclude_hashes: set[str] = field(default_factory=set)
+    exclude_file_hashes: set[str] = field(default_factory=set)
 
     def __post_init__(self):
         self.base_output_directory = pathify(self.base_output_directory)
         self.extensions = set(self.extensions)
         self.exclude_directories = set(self.exclude_directories)
         self.include_directories = set(self.include_directories)
-        self.exclude_hashes = self(self.exclude_hashes)
+        self.exclude_file_hashes = set(self.exclude_file_hashes)
         ensure_dir(self.base_output_directory)
 
     def __str__(self):
@@ -49,7 +49,7 @@ class Config:
             hash_function_algorithm=cls._DEFAULT_HASH_FUNCTION_ALGORITHM,
             exclude_directories=set(),
             include_directories=set(),
-            exclude_hashes=set(),
+            exclude_file_hashes=set(),
         )
 
     @property
