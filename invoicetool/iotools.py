@@ -146,8 +146,12 @@ def is_empty_file(path: Path) -> bool:
     """Return whether or not a file is an empty temporary MS Word document.
 
     Checks:
-    - If the filename begins with `~$`
-    - If the file size is exactly 162 bytes
+    - the file size is 0 bytes? → True
+    or
+    - the file size is 162 bytes AND:
+      - the filename starts with `~$`
+      or
+      - the file contents match the bytes of a temporary MS Word document
 
     Files which match these criteria are empty temporary MS Word documents.
     """

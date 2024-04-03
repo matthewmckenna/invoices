@@ -73,12 +73,14 @@ def export(
     output_directory_ = build_ymd_output_directory(base_output_directory_)
     ensure_dir(output_directory_)
 
-    word_documents = list(
-        get_word_documents(
+    word_documents = [
+        doc
+        for doc in get_word_documents(
             start_dir,
             exclude_directories=config.exclude_directories,
         )
-    )
+        if doc.hash not in config.exclude_hashes
+    ]
     logger.info(f"→ {len(word_documents)} unique Word documents")
     write_json(
         [w.to_dict() for w in word_documents], output_directory_ / "word-documents.json"
