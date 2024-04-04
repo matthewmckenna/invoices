@@ -41,3 +41,8 @@ def extract_date_as_datetime(text: str) -> datetime:
                 return datetime.strptime(f"{month[:3]} {year}", "%b %Y")
             except ValueError:
                 raise ValueError("Invalid date format")
+
+
+def extract_job_ref(text: str) -> str:
+    if match := re.search(r"job\s+ref\s*:?\s*(.+)", text, re.IGNORECASE):
+        return match.group(1).strip()

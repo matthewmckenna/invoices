@@ -93,3 +93,15 @@ def get_text_from_docx(filepath: Path | str) -> str:
 #     )
 #     raw_text = process.stdout
 #     return raw_text.strip()
+
+
+def _get_star_divide(text: str) -> str:
+    """Extract the star divide line ("**** ...") from the text"""
+    start = text.find("****")
+    end = text.find("\n", start)
+    return text[start:end]
+
+
+def split_invoice_on_divide(text: str) -> tuple[str, str]:
+    """Split the text into two parts at the star divide line"""
+    return tuple(text.split(f"{_get_star_divide(text)}\n"))
