@@ -2,7 +2,14 @@ import re
 from datetime import datetime
 
 INVOICE_TO_REGEX_PATTERN = r"Invoice(?:\s+To)?[:]?\s*(.+)"
-DATE_REGEX_PATTERN = r"Date\s*:?\s+(\w+ \d{4})"
+# DATE_REGEX_PATTERN = r"Date:?\s*(\w+ \d{4})"  # 43
+# DATE_REGEX_PATTERN = r"Date\s*:?\s+(\w+ \d{4})"  # 34
+# DATE_REGEX_PATTERN = r"Date:? ?(\w+ ?\d{4})"  # 21
+# DATE_REGEX_PATTERN = r"Date:? ?(\w+(?:\s+)?\d{4})"  # 19
+# DATE_REGEX_PATTERN = r"Date:? ?(\w+(?:\s+)?\d{2,4})"  # 18
+# DATE_REGEX_PATTERN = r"Date:? ?((?:(\d{1,2}\s+)?)\w+(?:\s+)?\d{2,4})"  # 12
+# DATE_REGEX_PATTERN = r"Date:? ?((?:(\d{1,2}\s+)?)\w+(?:[\s/–-]+)?(?:\w+)?(?:[\s/–-]+)?\d{2,4})"  # 4
+DATE_REGEX_PATTERN = r"Date:? ?((?:(\d{1,2}\s+)?)\w+(?:[\s/–-]+)?(?:\w+)?(?:[\s/–-]+)?(?:\w+)?\s*\d{2,4})"  # 2
 INVOICE_NUMBER_REGEX_PATTERN = r"Inv\s*:?\s+(\d+)"
 ADDRESS_REGEX_PATTERN = (
     r"^Invoice(?:\s+To)?[:]?\s*.+((?:\n.*)*)(?=(job\s+ref|description))"
