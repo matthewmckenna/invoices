@@ -1,8 +1,7 @@
 from dataclasses import asdict, dataclass
 
 from invoicetool.extract import (
-    extract_customer_address,
-    extract_customer_name,
+    extract_customer_name_and_address,
     extract_date,
     extract_invoice_number,
     extract_job_ref,
@@ -49,9 +48,10 @@ class Invoice:
     def from_word_document(cls, doc: WordDocument) -> "Invoice":
         text = doc.text
         header, footer = split_invoice_on_divide(text)
+        name, address = extract_customer_name_and_address(footer)
         customer = Customer(
-            name=extract_customer_name(footer),
-            address=extract_customer_address(footer),
+            name=name,
+            address=address,
         )
         return cls(
             invoice_number=extract_invoice_number(header),

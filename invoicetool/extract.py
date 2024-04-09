@@ -7,6 +7,9 @@ INVOICE_NUMBER_REGEX_PATTERN = r"Inv\s*:?\s+(\d+)"
 ADDRESS_REGEX_PATTERN = (
     r"^Invoice(?:\s+To)?[:]?\s*.+((?:\n.*)*)(?=(job\s+ref|description))"
 )
+NAME_AND_ADDRESS_REGEX_PATTERN = (
+    r"^Invoice(?:\s+To)?\s*[:]?\s*(.+)((?:\n(?!(job\s+ref|description)).*)*)"
+)
 
 
 def extract_customer_name(text):
@@ -46,3 +49,13 @@ def extract_date_as_datetime(text: str) -> datetime:
 def extract_job_ref(text: str) -> str:
     if match := re.search(r"job\s+ref\s*:?\s*(.+)", text, re.IGNORECASE):
         return match.group(1).strip()
+
+
+def extract_customer_name_and_address(text: str) -> tuple[str, str | None, None]:
+    name, address = None, None
+    if match := re.search(
+        NAME_AND_ADDRESS_REGEX_PATTERN, text, re.IGNORECASE | re.MULTILINE
+    ):
+        name = match.group(1).strip()
+        address = match.group(2).strip()
+    return name, address
