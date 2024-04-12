@@ -82,12 +82,8 @@ def export(
         )
         if doc.hash not in config.exclude_file_hashes
     ]
-    logger.info(
-        f"→ {len(word_documents)} unique Word documents exported to {output_directory_}"
-    )
-    write_json(
-        [w.to_dict() for w in word_documents], output_directory_ / "word-documents.json"
-    )
+    logger.info(f"→ {len(word_documents)} unique Word documents exported to {output_directory_}")
+    write_json([w.to_dict() for w in word_documents], output_directory_ / "word-documents.json")
 
 
 @cli.command()

@@ -164,7 +164,4 @@ def test_remove_empty_directories(
     ],
 )
 def test_get_relative_filepath(filepath, starting_directory, expected_filepath):
-    assert (
-        get_relative_filepath(Path(filepath), str(starting_directory.name))
-        == expected_filepath
-    )
+    assert get_relative_filepath(Path(filepath), str(starting_directory.name)) == expected_filepath

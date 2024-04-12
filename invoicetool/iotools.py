@@ -51,8 +51,7 @@ def get_word_documents(
         # TODO: clean this up later
         original_path = Path(*entry.parts[9:])
         if exclude_directories and any(
-            original_path.match(exclude_directory)
-            for exclude_directory in exclude_directories
+            original_path.match(exclude_directory) for exclude_directory in exclude_directories
         ):
             continue
         if entry.is_dir():
@@ -129,9 +128,7 @@ def get_filepaths_of_interest(directory: Path, extensions: set[str]) -> Iterator
         yield filepath
 
 
-def remove_temporary_word_files(
-    directory: Path, *, dry_run: bool = False, logger: logging.Logger
-):
+def remove_temporary_word_files(directory: Path, *, dry_run: bool = False, logger: logging.Logger):
     """recursively scan for and remove any temporary ms word files"""
     # Hard-code the extensions as we're removing specific file types
     extensions = {".doc", ".docx"}
@@ -158,10 +155,7 @@ def is_empty_file(path: Path) -> bool:
     return (
         path.stat().st_size == 0
         or path.stat().st_size == 162
-        and (
-            path.name.startswith("~$")
-            or path.read_bytes() == TEMPORARY_MS_WORD_DOCUMENT_BYTES
-        )
+        and (path.name.startswith("~$") or path.read_bytes() == TEMPORARY_MS_WORD_DOCUMENT_BYTES)
     )
 
 
@@ -252,15 +246,11 @@ def remove_directory_if_empty(directory: Path) -> None:
         directory.rmdir()
 
 
-def generate_manifest(
-    start_dir: Path, output_directory: Path, extensions: Iterable[str]
-):
+def generate_manifest(start_dir: Path, output_directory: Path, extensions: Iterable[str]):
     return sorted(filepaths_with_extensions(start_dir, extensions))
 
 
-def build_output_directory(
-    base_output_directory: Path, starting_directory: Path
-) -> Path:
+def build_output_directory(base_output_directory: Path, starting_directory: Path) -> Path:
     return build_ymd_output_directory(base_output_directory) / starting_directory.name
 
 
@@ -294,9 +284,7 @@ def remove_directory_with_files_matching_extensions(
         shutil.rmtree(directory)
 
 
-def get_duplicate_files(
-    hashes: dict[str, list[str]], *, sort: bool = True
-) -> dict[str, list[str]]:
+def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> dict[str, list[str]]:
     """Return a dictionary of files with duplicate hashes.
 
     Args:

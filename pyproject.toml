@@ -55,3 +55,7 @@ invoicetool = "invoicetool.cli:cli"
 # addopts = "-ra -v --cov-report=html --cov-report=term --cov-report=xml:.out/coverage.xml"
 addopts = "-ra -v"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
