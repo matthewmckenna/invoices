@@ -1,10 +1,89 @@
 import json
 import logging
 import shutil
+from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 from invoicetool.dates_times import today2ymd
+from invoicetool.hashes import calculate_hash
+from invoicetool.word import (
+    TEMPORARY_MS_WORD_DOCUMENT_BYTES,
+    WordDocument,
+    get_text_from_docx,
+)
+
+
+class FileFormat(StrEnum):
+    DOC: str = auto()
+    DOCX: str = auto()
+
+    @classmethod
+    def from_str(cls, s: str) -> "FileFormat":
+        filetype_ = s.strip().lower()
+        for supported_filetype in cls.__members__.values():
+            if filetype_ == supported_filetype.value:
+                return supported_filetype
+        supported_filetypes = list(cls.__members__.keys())
+        raise ValueError(
+            f"unknown file type: {filetype_} (supported file types: {supported_filetypes})"
+        )
+
+    @classmethod
+    def word_docs_default_extensions(cls) -> set[str]:
+        return {f".{file_format.lower()}" for file_format in cls.__members__.keys()}
+
+
+def get_word_documents(
+    path: Path,
+    *,
+    hash_function: str = "sha1",
+    extensions: set[str] | None = FileFormat.word_docs_default_extensions(),
+    filter_empty_files: bool = True,
+    exclude_directories: set[str] | None = None,
+    filter_seen: bool = True,
+    seen_file_hashes: set[str] | None = None,
+) -> Iterator[WordDocument]:
+    if seen_file_hashes is None:
+        seen_file_hashes = set()
+
+    for entry in path.iterdir():
+        # TODO: clean this up later
+        original_path = Path(*entry.parts[9:])
+        if exclude_directories and any(
+            original_path.match(exclude_directory) for exclude_directory in exclude_directories
+        ):
+            continue
+        if entry.is_dir():
+            yield from get_word_documents(
+                entry,
+                hash_function=hash_function,
+                extensions=extensions,
+                filter_empty_files=filter_empty_files,
+                exclude_directories=exclude_directories,
+                filter_seen=filter_seen,
+                seen_file_hashes=seen_file_hashes,
+            )
+        elif extensions is None or entry.suffix in extensions:
+            if not filter_empty_files or not is_empty_file(entry):
+                stat_info = entry.stat()
+                entry_as_posix = entry.as_posix()
+                file_hash = calculate_hash(entry, hash_function=hash_function)
+                text = get_text_from_docx(entry_as_posix)
+                if filter_seen and file_hash in seen_file_hashes:
+                    continue
+                yield WordDocument(
+                    name=entry.name,
+                    modification_time=stat_info.st_mtime,
+                    size=stat_info.st_size,
+                    hash=file_hash,
+                    original_path=original_path.as_posix(),
+                    text=text,
+                    _hash_type=hash_function,
+                    _path=entry_as_posix,
+                )
+                seen_file_hashes.add(file_hash)
+
 
 # def ensure_path(path: Path | str):
 #     """Ensure that a directory exists, creating if needed"""
@@ -49,9 +128,7 @@ def get_filepaths_of_interest(directory: Path, extensions: set[str]) -> Iterator
         yield filepath
 
 
-def remove_temporary_word_files(
-    directory: Path, *, dry_run: bool = False, logger: logging.Logger
-):
+def remove_temporary_word_files(directory: Path, *, dry_run: bool = False, logger: logging.Logger):
     """recursively scan for and remove any temporary ms word files"""
     # Hard-code the extensions as we're removing specific file types
     extensions = {".doc", ".docx"}
@@ -66,12 +143,20 @@ def is_empty_file(path: Path) -> bool:
     """Return whether or not a file is an empty temporary MS Word document.
 
     Checks:
-    - If the filename begins with `~$`
-    - If the file size is exactly 162 bytes
+    - the file size is 0 bytes? → True
+    or
+    - the file size is 162 bytes AND:
+      - the filename starts with `~$`
+      or
+      - the file contents match the bytes of a temporary MS Word document
 
     Files which match these criteria are empty temporary MS Word documents.
     """
-    return path.name.startswith("~$") and path.stat().st_size == 162
+    return (
+        path.stat().st_size == 0
+        or path.stat().st_size == 162
+        and (path.name.startswith("~$") or path.read_bytes() == TEMPORARY_MS_WORD_DOCUMENT_BYTES)
+    )
 
 
 def copy_files(destination: Path, filepaths: Iterable[Path]) -> None:
@@ -161,16 +246,17 @@ def remove_directory_if_empty(directory: Path) -> None:
         directory.rmdir()
 
 
-def generate_manifest(
-    start_dir: Path, output_directory: Path, extensions: Iterable[str]
-):
+def generate_manifest(start_dir: Path, output_directory: Path, extensions: Iterable[str]):
     return sorted(filepaths_with_extensions(start_dir, extensions))
 
 
-def build_output_directory(
-    base_output_directory: Path, starting_directory: Path
-) -> Path:
-    return base_output_directory / today2ymd() / starting_directory.name
+def build_output_directory(base_output_directory: Path, starting_directory: Path) -> Path:
+    return build_ymd_output_directory(base_output_directory) / starting_directory.name
+
+
+def build_ymd_output_directory(base_output_directory: Path) -> Path:
+    """Return a Path with a directory structure of `base_output_directory/YYYY-MM-DD`."""
+    return base_output_directory / today2ymd()
 
 
 def remove_directory_with_files_matching_extensions(
@@ -196,3 +282,21 @@ def remove_directory_with_files_matching_extensions(
     if not dry_run:
         logger.debug(f"🗑️  Removing {n_files} files in {pathify(directory)!s}")
         shutil.rmtree(directory)
+
+
+def get_duplicate_files(hashes: dict[str, list[str]], *, sort: bool = True) -> dict[str, list[str]]:
+    """Return a dictionary of files with duplicate hashes.
+
+    Args:
+        hashes: dictionary of hashes and the files that have that
+            hash.
+
+    Returns:
+        dictionary of duplicate files, keyed by the hash.
+    """
+    duplicates = {k: v for k, v in hashes.items() if len(v) > 1}
+
+    if sort:
+        return dict(sorted(duplicates.items(), key=lambda d: len(d[1]), reverse=True))
+    else:
+        return duplicates

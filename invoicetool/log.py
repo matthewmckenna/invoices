@@ -1,9 +1,8 @@
 import logging
 import logging.config
+import tomllib
 from pathlib import Path
 from typing import Any
-
-import tomllib
 
 from invoicetool.config import Config
 from invoicetool.dates_times import ymdhms_now
@@ -16,14 +15,8 @@ def get_logger(
     config_filepath: Path | str | None = None,
 ) -> logging.Logger:
     """Configure logging"""
-    _config = (
-        Config.from_file(config_filepath)
-        if config_filepath is not None
-        else Config.default()
-    )
-    logging_config = load_logging_config_dict(
-        config_filepath or _config._DEFAULT_CONFIG_PATH
-    )
+    _config = Config.from_file(config_filepath) if config_filepath is not None else Config.default()
+    logging_config = load_logging_config_dict(config_filepath or _config._DEFAULT_CONFIG_PATH)
     logs_directory = pathify(_config.project_directory) / "logs"
     logging_config["handlers"]["file_handler"]["filename"] = (
         logs_directory / f"{ymdhms_now()}.log"

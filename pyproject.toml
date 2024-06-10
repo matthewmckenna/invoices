@@ -26,6 +26,11 @@ dev = [
     "ruff == 0.3.3"
     # "pytest-cov == 4.0.0"
 ]
+manifest-analysis = [
+    "jupyterlab == 4.1.5",
+    "pandas == 2.2.1",
+    "pyarrow == 15.0.2",
+]
 
 [project.scripts]
 invoicetool = "invoicetool.cli:cli"
@@ -50,3 +55,7 @@ invoicetool = "invoicetool.cli:cli"
 # addopts = "-ra -v --cov-report=html --cov-report=term --cov-report=xml:.out/coverage.xml"
 addopts = "-ra -v"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

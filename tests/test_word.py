@@ -6,8 +6,8 @@ from invoicetool.word import (
     extract_text_from_doc,
     extract_text_from_doc_as_list,
     extract_text_from_document,
-    extract_text_from_docx,
     extract_text_from_docx_as_list,
+    get_text_from_docx,
     text_to_paragraphs,
 )
 
@@ -31,13 +31,13 @@ Four paragraphs in this doc, but the difference is this is a .docx.
 
 def test_extract_text_from_docx(docx_bytes):
     expected = "This is the first paragraph.\nThis is the second paragraph."
-    assert extract_text_from_docx(docx_bytes) == expected
+    assert get_text_from_docx(docx_bytes) == expected
 
 
 def test_extract_text_from_docx_non_existent_file(tmp_path):
     filepath = tmp_path / "nonexistent.docx"
     with pytest.raises(FileNotFoundError):
-        extract_text_from_docx(filepath)
+        get_text_from_docx(filepath)
 
 
 def test_extract_text_from_docx_not_a_docx_file(tmp_path):

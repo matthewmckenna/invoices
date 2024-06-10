@@ -5,6 +5,11 @@ extensions = [".doc", ".docx"]
 base_output_directory = "~/.invoicetool"
 hash_function_algorithm = "sha1"
 
+# include_directories = []
+# exclude_directories = []
+# exclude_file_hashes = []
+# customer_map_path = "~/.invoicetool/config/customer-map.json"
+
 [log]
 version = 1
 

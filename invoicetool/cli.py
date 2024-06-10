@@ -7,11 +7,15 @@ import click
 
 from invoicetool import __version__
 from invoicetool.config import Config
-from invoicetool.hashes import calculate_hashes, get_duplicate_files
+from invoicetool.hashes import calculate_hashes
 from invoicetool.iotools import (
     build_output_directory,
+    build_ymd_output_directory,
     copy_files,
+    ensure_dir,
+    get_duplicate_files,
     get_filepaths_of_interest,
+    get_word_documents,
     make_archive,
     pathify,
     remove_directory_with_files_matching_extensions,
@@ -42,6 +46,44 @@ config_option = click.option(
     type=click.Path(resolve_path=True, path_type=Path, dir_okay=False),
     help="path to config file",
 )
+
+
+@cli.command()
+@base_output_directory_option
+@start_dir_argument
+@config_option
+def export(
+    start_dir: Path,
+    base_output_directory: Path | None = None,
+    config_filepath: Path | None = None,
+):
+    """Export Word documents to JSON format"""
+    logger = get_logger()
+    config = Config.from_file(config_filepath)
+    logger.info(config)
+
+    # the `~` doesn't get expanded with `click.Path`
+    start_dir = pathify(start_dir)
+
+    # TODO: tidy this up
+    base_output_directory_ = (
+        pathify(base_output_directory)
+        if base_output_directory is not None
+        else config.base_output_directory
+    )
+    output_directory_ = build_ymd_output_directory(base_output_directory_)
+    ensure_dir(output_directory_)
+
+    word_documents = [
+        doc
+        for doc in get_word_documents(
+            start_dir,
+            exclude_directories=config.exclude_directories,
+        )
+        if doc.hash not in config.exclude_file_hashes
+    ]
+    logger.info(f"→ {len(word_documents)} unique Word documents exported to {output_directory_}")
+    write_json([w.to_dict() for w in word_documents], output_directory_ / "word-documents.json")
 
 
 @cli.command()

@@ -1,26 +1,38 @@
+import tomllib
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import ClassVar
 
-import tomllib
-
-from invoicetool.iotools import ensure_dir, pathify
+from invoicetool.iotools import FileFormat, ensure_dir, pathify
 
 
 @dataclass
 class Config:
-    _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[set[str]] = {".doc", ".docx"}
+    _DEFAULT_EXTENSION_ALLOW_LIST: ClassVar[set[str]] = FileFormat.word_docs_default_extensions()
     _DEFAULT_CONFIG_PATH: ClassVar[str] = "./config.toml"
     _DEFAULT_BASE_OUTPUT_DIRECTORY: ClassVar[str] = "~/.invoicetool"
     _DEFAULT_HASH_FUNCTION_ALGORITHM: ClassVar[str] = "sha1"
+    _DEFAULT_CUSTOMER_MAP_PATH: ClassVar[str] = (
+        f"{_DEFAULT_BASE_OUTPUT_DIRECTORY}/config/customer-map.json"
+    )
 
     hash_function_algorithm: str
     base_output_directory: Path
+    # TODO: I'm not really happy with this, but it's OK for now
+    customer_map_path: Path | None = None
     extensions: set[str] = field(default_factory=set)
+    exclude_directories: set[str] = field(default_factory=set)
+    include_directories: set[str] = field(default_factory=set)
+    exclude_file_hashes: set[str] = field(default_factory=set)
 
     def __post_init__(self):
+        if self.customer_map_path is not None:
+            self.customer_map_path = pathify(self.customer_map_path)
         self.base_output_directory = pathify(self.base_output_directory)
         self.extensions = set(self.extensions)
+        self.exclude_directories = set(self.exclude_directories)
+        self.include_directories = set(self.include_directories)
+        self.exclude_file_hashes = set(self.exclude_file_hashes)
         ensure_dir(self.base_output_directory)
 
     def __str__(self):
